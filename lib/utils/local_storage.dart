@@ -1,23 +1,22 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LocalStorage {
   final _storage = const FlutterSecureStorage();
 
-  Future<Session?> getSession() async {
+  Future getSession() async {
     final session = await _storage.read(key: 'session');
 
     if (session != null) {
-      return Session.fromJson(jsonDecode(session));
+      return jsonDecode(session);
     }
 
     return null;
   }
 
-  Future<void> setSession(Session session) async {
-    await _storage.write(key: 'session', value: jsonEncode(session.toJson()));
+  Future<void> setSession(param0) async {
+    await _storage.write(key: 'session', value: "{}");
   }
 
   Future<void> deleteSession() async {

@@ -1,37 +1,42 @@
+import 'package:timezone/timezone.dart' as tz;
+
 class User {
   final String id;
-  final String email;
+  final String? email;
   final String? name;
-  final String? avatarUrl;
-  final String? profession;
-
-  String get username => name ?? email;
+  final String? gender;
+  final tz.TZDateTime? lastOpened;
+  final tz.TZDateTime? createdAt;
 
   User({
     required this.id,
-    required this.email,
+    this.email,
     this.name,
-    this.avatarUrl,
-    this.profession,
+    this.gender,
+    this.lastOpened,
+    this.createdAt
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<dynamic, dynamic> json) {
     return User(
-      id: json['user_id'],
+      id: json['id'],
       email: json['email'],
       name: json['name'],
-      avatarUrl: json['avatar_url'],
-      profession: json['profession'],
+      gender: json['gender'],
+      lastOpened: tz.TZDateTime.parse(tz.local, json['lastOpened']),
+      createdAt: tz.TZDateTime.parse(tz.local, json['createdAt']),
+
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'user_id': id,
+      'id': id,
       'email': email,
       'name': name,
-      'avatar_url': avatarUrl,
-      'profession': profession,
+      'gender': gender,
+      'lastOpened': lastOpened.toString(),
+      'createdAt': createdAt.toString(),
     };
   }
 }

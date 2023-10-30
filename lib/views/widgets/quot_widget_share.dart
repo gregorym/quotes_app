@@ -4,8 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../models/quote_model.dart';
-import '../themes/colors.dart';
-import '../themes/typography.dart';
 
 class QuotWidgetShare extends StatelessWidget {
   const QuotWidgetShare({
@@ -26,7 +24,7 @@ class QuotWidgetShare extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: Color(quote.backgroundColor),
+        color: Colors.black,
         borderRadius: BorderRadius.circular(36),
       ),
       child: Stack(
@@ -51,7 +49,7 @@ class QuotWidgetShare extends StatelessWidget {
                 Icon(
                   PhosphorIcons.fill.quotes,
                   size: 70,
-                  color: Color(quote.textColor),
+                  color: Colors.white
                 ),
                 const SizedBox(height: 20),
                 Expanded(
@@ -60,76 +58,14 @@ class QuotWidgetShare extends StatelessWidget {
                     maxFontSize: 28,
                     minFontSize: 18,
                     maxLines: 10,
-                    textAlign: quote.textAlign,
                     style: GoogleFonts.getFont(
-                      quote.fontFamily,
-                      color: Color(quote.textColor),
-                      fontSize: quote.fontSize ?? 28,
+                      "Nunito Sans",
+                      color: Colors.white,
+                      fontSize:  28,
                       fontWeight: FontWeight.w600,
                       height: 1.3,
                     ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (quote.avatar == null)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: MyColors.black.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        height: 35,
-                        width: 35,
-                        child: Center(
-                          child: Text(
-                            quote.author[0],
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundImage: AssetImage(quote.avatar!),
-                      ),
-                    const SizedBox(width: 16),
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            quote.author,
-                            maxLines: 1,
-                            style: MyTypography.body2.copyWith(
-                              color: Color(quote.textColor),
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          if (quote.profession != null &&
-                              quote.profession != "")
-                            const SizedBox(height: 5),
-                          if (quote.profession != null &&
-                              quote.profession != "")
-                            Text(
-                              quote.profession!,
-                              style: MyTypography.body2.copyWith(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: Color(quote.textColor),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

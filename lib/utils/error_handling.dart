@@ -1,10 +1,6 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ErrorHandling {
   static String getErrorMessage(e) {
-    if (e is AuthException) {
-      return e.message;
-    }
 
     e = e.toString().toLowerCase();
 

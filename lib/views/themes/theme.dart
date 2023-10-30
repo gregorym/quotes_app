@@ -42,16 +42,16 @@ class MyTheme {
         900: MyColors.secondary.withOpacity(1.0),
       },
     ),
-    scaffoldBackgroundColor: MyColors.black,
+    scaffoldBackgroundColor: MyColors.primaryDark,
     appBarTheme: AppBarTheme(
-      backgroundColor: MyColors.black,
+      backgroundColor: MyColors.primaryDark,
       elevation: 0,
       iconTheme: IconThemeData(
         color: MyColors.primary,
       ),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: MyColors.black,
+      backgroundColor: MyColors.primaryDark,
       selectedItemColor: MyColors.primary,
       unselectedItemColor: MyColors.secondary,
     ),

@@ -1,106 +1,68 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quotes_app/controllers/quotes_controller.dart';
+import 'package:quotes_app/views/templates/subscription_page_template.dart';
+import 'package:quotes_app/views/widgets/quotes_card.dart';
+import 'package:quotes_app/views/widgets/streak_card.dart';
 
-import '../../models/quote_model.dart';
-import '../pages/quote_detail_page.dart';
-import '../pages/search_page.dart';
-import '../themes/typography.dart';
-import '../widgets/icon_solid_light.dart';
-import '../widgets/quotes_card.dart';
+import '../themes/colors.dart';
 
-class QuotesPage extends StatelessWidget {
+class QuotesPage extends ConsumerWidget {
   const QuotesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            centerTitle: false,
-            backgroundColor: Colors.white,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: IconSolidLight(
-                  icon: PhosphorIcons.regular.magnifyingGlass,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SearchPage(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-            title: Text("Quotes", style: MyTypography.h2),
-            expandedHeight: 116,
-            elevation: 0,
-            floating: true,
-            pinned: false,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: false,
-              expandedTitleScale: 1.0,
-              titlePadding: const EdgeInsets.symmetric(
-                horizontal: 40,
-                vertical: 16,
-              ),
-              title: Text(
-                "Quotes",
-                style: MyTypography.h2,
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    right: 16,
-                    left: 16,
-                    bottom: 16,
-                    top: index == 0 ? 100 : 0,
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      final quote = Quote(
-                        author: 'Rick Riordan',
-                        content:
-                            'The best way to get started is to quit talking and begin doing.',
-                        backgroundColor: Colors.blue.value,
-                        textColor: Colors.white.value,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        textAlign: TextAlign.center,
-                        userId: '',
-                        profession: 'CEO of The Walt Disney Company',
-                      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final quotesState = ref.watch(quotesProvider);
 
+    return Scaffold(
+        backgroundColor: MyColors
+            .primaryDark, // make sure to define MyColors class with secondary color
+        body: SafeArea(
+            child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32.0),
+                      ),
+                    ),
+                    onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => QuoteDetailPage(
-                            quote: quote,
-                          ),
+                          builder: (context) => const SubscriptionPage(),
                         ),
                       );
                     },
-                    child: const QuotesCard(
-                      author: "Rick Riordan",
-                      authorAvatar: "assets/img_avatar.png",
-                      authorJob: "Co-Founder of The Walt Disney Company",
-                      content:
-                          "The best way to get started is to quit talking and begin doing.",
+                    child: Row(
+                      mainAxisSize:
+                          MainAxisSize.max, // Use minimum space of Row
+                      children: const <Widget>[
+                        Text('Try it free ⚡'),
+                      ],
                     ),
                   ),
-                );
-              },
-              childCount: 7,
+                ],
+              ),
             ),
-          )
-        ],
-      ),
-    );
+            Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 42),
+                      const StreakCard(),
+                      SizedBox(height: 42),
+                      QuotesCard()
+                    ])),
+          ],
+        )));
   }
 }

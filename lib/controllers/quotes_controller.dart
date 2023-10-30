@@ -1,9 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quotes_app/models/quotable_model.dart';
 import 'package:quotes_app/repositories/quotes_repository.dart';
 
 import '../models/quote_model.dart';
-import 'user_controller.dart';
 
 final getQuotesProvider = FutureProvider<List<Quotable>>((ref) async {
   final repo = ref.watch(quotesRepositoryProvider);
@@ -12,13 +13,18 @@ final getQuotesProvider = FutureProvider<List<Quotable>>((ref) async {
   return await controller.getRandomQuotes();
 });
 
+final randomQuoteProvider = FutureProvider<Quotable>((ref) async {
+  final repo = ref.watch(quotesRepositoryProvider);
+  final controller = QuotesController(repo);
+
+  return await controller.getRandomQuote();
+});
+
 final quotesProvider =
     StateNotifierProvider<QuotesController, AsyncValue<List<Quote>?>>((ref) {
   final repo = ref.watch(quotesRepositoryProvider);
 
-  String userId = ref.read(userProvider)!.id;
-
-  return QuotesController(repo)..getQuotesByMe(userId);
+  return QuotesController(repo)..getQuotesByMe();
 });
 
 class QuotesController extends StateNotifier<AsyncValue<List<Quote>?>> {
@@ -32,14 +38,22 @@ class QuotesController extends StateNotifier<AsyncValue<List<Quote>?>> {
     return result;
   }
 
+  Future<Quotable> getRandomQuote() async {
+    final result = await quotesRepository.getRandomQuotes();
+
+    final randomIndex = Random().nextInt(result.length);
+    final randomQuote = result[randomIndex];
+    return randomQuote;
+  }
+
   Future<void> createQuote(Quote quote) async {
     await quotesRepository.createQuote(quote);
   }
 
-  Future<void> getQuotesByMe(String userId) async {
+  Future<void> getQuotesByMe() async {
     state = const AsyncValue.loading();
 
-    final result = await quotesRepository.getQuotesByMe(userId);
+    final result = await quotesRepository.getQuotesByMe();
 
     if (mounted) {
       state = AsyncValue.data(result);
