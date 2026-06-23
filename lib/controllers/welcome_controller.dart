@@ -1,12 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:quotes_app/controllers/user_controller.dart';
 
 import '../models/user_model.dart';
 
-
 class WelcomeController extends StateNotifier<AsyncValue<User?>> {
-  WelcomeController(this.userController)
-      : super(const AsyncValue.data(null));
+  WelcomeController(this.userController) : super(const AsyncValue.data(null));
 
   final UserController userController;
 

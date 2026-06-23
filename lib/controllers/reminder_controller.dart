@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive/hive.dart';
 import 'package:quotes_app/models/reminder_model.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -11,7 +12,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 final reminderProvider = FutureProvider<Reminder?>((ref) {
-  ReminderController controller =  ReminderController();
+  final controller = ReminderController();
   return controller.fetchReminder();
 });
 
@@ -86,7 +87,7 @@ class ReminderController extends StateNotifier<Reminder?> {
   Future<void> cancelAllUpcomingReminders() async {
     Reminder r = await fetchReminder();
     for (Notification n in r.notifications) {
-      await flutterLocalNotificationsPlugin.cancel(n.id);
+      await flutterLocalNotificationsPlugin.cancel(id: n.id);
     }
     Reminder newReminder = Reminder(
       id: r.id,
@@ -130,8 +131,7 @@ class ReminderController extends StateNotifier<Reminder?> {
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
 
-      final bool? grantedNotificationPermission =
-          await androidImplementation?.requestNotificationsPermission();
+      await androidImplementation?.requestNotificationsPermission();
     }
   }
 
@@ -158,11 +158,14 @@ class ReminderController extends StateNotifier<Reminder?> {
           ?.createNotificationChannel(channel);
     }
 
-    flutterLocalNotificationsPlugin.zonedSchedule(
-        id, title, body, time, platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time);
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: time,
+      notificationDetails: platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
   }
 }

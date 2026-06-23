@@ -1,6 +1,5 @@
 import 'package:fast_color_picker/fast_color_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../themes/typography.dart';
 
@@ -30,7 +29,7 @@ class ColorPicker extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: FastColorPicker(
-            icon: PhosphorIcons.regular.checkCircle,
+            icon: Icons.check_circle_outline,
             selectedColor: selectedColor,
             onColorSelected: onColorSelected,
           ),

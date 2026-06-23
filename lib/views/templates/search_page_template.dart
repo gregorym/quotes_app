@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../themes/colors.dart';
 import '../themes/typography.dart';
@@ -16,7 +15,7 @@ class SearchPage extends StatelessWidget {
         backgroundColor: Colors.white,
         leadingWidth: 76,
         leading: IconSolidLight(
-          icon: PhosphorIcons.regular.caretLeft,
+          icon: Icons.chevron_left,
           onTap: () => Navigator.pop(context),
         ),
         title: Text(
@@ -51,7 +50,7 @@ class SearchPage extends StatelessWidget {
                     ),
                     border: InputBorder.none,
                     prefixIcon: Icon(
-                      PhosphorIcons.regular.magnifyingGlass,
+                      Icons.search,
                       color: MyColors.black,
                     ),
                   ),
@@ -75,8 +74,8 @@ class SearchPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(100),
               ),
               padding: const EdgeInsets.all(40),
-              child: Icon(
-                PhosphorIcons.fill.quotes,
+              child: const Icon(
+                Icons.format_quote,
                 size: 48,
               ),
             ),

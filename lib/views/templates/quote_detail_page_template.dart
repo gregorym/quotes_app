@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../themes/typography.dart';
 import '../widgets/icon_solid_light.dart';
@@ -26,7 +25,7 @@ class QuoteDetailPage extends StatelessWidget {
         backgroundColor: Colors.white,
         leadingWidth: 76,
         leading: IconSolidLight(
-          icon: PhosphorIcons.regular.caretLeft,
+          icon: Icons.chevron_left,
           onTap: () => Navigator.pop(context),
         ),
         title: Text(
@@ -51,8 +50,8 @@ class QuoteDetailPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              PhosphorIcons.fill.quotes,
+            const Icon(
+              Icons.format_quote,
               size: 70,
               color: Colors.white,
             ),
@@ -109,14 +108,14 @@ class QuoteDetailPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconSolidLight(
-                  icon: PhosphorIcons.fill.heart,
+                const IconSolidLight(
+                  icon: Icons.favorite,
                 ),
                 const SizedBox(width: 16),
                 // share button with icon
                 ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Icon(PhosphorIcons.fill.shareFat),
+                  icon: const Icon(Icons.share),
                   label: const Text("Share"),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,

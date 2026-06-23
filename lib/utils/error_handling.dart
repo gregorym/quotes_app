@@ -1,10 +1,8 @@
-
 class ErrorHandling {
-  static String getErrorMessage(e) {
+  static String getErrorMessage(Object e) {
+    final message = e.toString().toLowerCase();
 
-    e = e.toString().toLowerCase();
-
-    if (e.contains('already exists')) {
+    if (message.contains('already exists')) {
       return 'Email already exists';
     }
 

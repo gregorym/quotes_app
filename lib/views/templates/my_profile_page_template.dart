@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../themes/colors.dart';
 import '../themes/typography.dart';
@@ -94,7 +93,7 @@ class MyProfile extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(
-                          PhosphorIcons.regular.fire,
+                          Icons.local_fire_department,
                           size: 16,
                           color: MyColors.primary,
                         ),
@@ -124,7 +123,7 @@ class MyProfile extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          PhosphorIcons.regular.signOut,
+                          Icons.logout,
                           size: 16,
                           color: MyColors.primary,
                         ),
@@ -208,8 +207,8 @@ class MyProfile extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      PhosphorIcons.regular.caretRight,
+                    const Icon(
+                      Icons.chevron_right,
                       color: Colors.grey,
                     ),
                   ],
@@ -227,8 +226,8 @@ class MyProfile extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Icon(
-                      PhosphorIcons.regular.caretRight,
+                    const Icon(
+                      Icons.chevron_right,
                       color: Colors.grey,
                     ),
                   ],

@@ -5,20 +5,14 @@ class ReminderWidget extends StatefulWidget {
   const ReminderWidget({super.key});
 
   @override
-  _ReminderWidgetState createState() => _ReminderWidgetState();
+  State<ReminderWidget> createState() => _ReminderWidgetState();
 }
 
-// function that takes a number and return a string on a time format.
-// Input: 850
-// Output: 08:30
 String timeToString(int time) {
-  String timeString = time.toString();
-  if (timeString.length == 3) {
-    timeString = "0" + timeString;
-  }
-  String prefix = timeString.substring(0, 2);
-  String suffix = timeString.substring(2, 4);
-  return prefix + ":" + (suffix == "00" ? "00" : "30");
+  final timeString = time.toString().padLeft(4, '0');
+  final prefix = timeString.substring(0, 2);
+  final suffix = timeString.substring(2, 4);
+  return '$prefix:${suffix == "00" ? "00" : "30"}';
 }
 
 class _ReminderWidgetState extends State<ReminderWidget> {
@@ -172,8 +166,11 @@ class _ReminderWidgetState extends State<ReminderWidget> {
     );
   }
 
-  Widget _buildDayCircle(String day,
-      {bool selected = false, onPress: Function}) {
+  Widget _buildDayCircle(
+    String day, {
+    bool selected = false,
+    required VoidCallback onPress,
+  }) {
     return GestureDetector(
         onTap: onPress,
         child: Container(

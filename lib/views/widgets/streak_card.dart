@@ -6,7 +6,6 @@ import 'package:quotes_app/controllers/streak_controller.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../controllers/reminder_controller.dart';
-import '../../controllers/subscription_controller.dart';
 import '../../models/streak_model.dart';
 import '../themes/colors.dart';
 
@@ -15,14 +14,15 @@ class StreakCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasSubState = ref.watch(subscribedProvider);
-    final reminderState = ref.watch(reminderProvider);
     final streakState = ref.watch(streakProvider);
+    final streakCount = streakState.maybeWhen(
+      data: (streakList) => streakList.length,
+      orElse: () => 0,
+    );
 
-    bool isStreakCreatedToday = streakState.maybeWhen(
+    final isStreakCreatedToday = streakState.maybeWhen(
       data: (streakList) {
-        print(streakList);
-        tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+        final now = tz.TZDateTime.now(tz.local);
         if (now.hour < 17) {
           return true;
         }
@@ -30,7 +30,7 @@ class StreakCard extends ConsumerWidget {
         if (streakList.isEmpty) {
           return false;
         }
-        tz.TZDateTime lastStreakCreatedAt = streakList[0].createdAt;
+        final lastStreakCreatedAt = streakList.last.createdAt;
 
         return lastStreakCreatedAt.year == now.year &&
             lastStreakCreatedAt.month == now.month &&
@@ -45,15 +45,15 @@ class StreakCard extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text("Streak",
-                style: GoogleFonts.getFont("Nunito Sans",
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(
-              width: 8,
+            Text(
+              "Streak",
+              style: GoogleFonts.getFont(
+                "Nunito Sans",
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Icon(Icons.lock, color: MyColors.primaryDark, size: 24)
           ],
         ),
         Container(
@@ -65,12 +65,14 @@ class StreakCard extends ConsumerWidget {
           child: Stack(
             children: [
               Positioned(
-                  right: -25,
-                  top: 25,
-                  child: Icon(Icons.local_fire_department,
-                      color: Colors.deepOrangeAccent.withOpacity(0.5),
-                      size: 120)), // Flame icon
-
+                right: -25,
+                top: 25,
+                child: Icon(
+                  Icons.local_fire_department,
+                  color: Colors.deepOrangeAccent.withValues(alpha: 0.5),
+                  size: 120,
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -85,19 +87,22 @@ class StreakCard extends ConsumerWidget {
                           ? [
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text(
-                                    '5',
-                                    style: TextStyle(
+                                    '$streakCount',
+                                    style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize:
-                                          48, // Large font size for the number
+                                      fontSize: 48,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Text('days',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 12)),
+                                  const Text(
+                                    'days',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ]
@@ -108,38 +113,41 @@ class StreakCard extends ConsumerWidget {
                     child: isStreakCreatedToday
                         ? _listWeekStreak(ref)
                         : _buildTodayScore(ref),
-                  )
+                  ),
                 ],
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
 
   Widget _listWeekStreak(WidgetRef ref) {
     final reminderState = ref.watch(reminderProvider);
+    final todayIndex = tz.TZDateTime.now(tz.local).weekday % 7;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(7, (index) => index)
-          .map((dayIndex) => _buildDayCircle(
-                ['S', 'M', 'T', 'W', 'T', 'F', 'S'][dayIndex],
-                isToday: tz.TZDateTime.now(tz.local).weekday == dayIndex,
-                score: 0,
-                isAfterToday: tz.TZDateTime.now(tz.local).weekday < dayIndex,
-                isSkipped: reminderState.maybeWhen(
-                  data: (r) => r != null ? !r.days[dayIndex] : false,
-                  orElse: () => false,
-                ),
-              ))
+          .map(
+            (dayIndex) => _buildDayCircle(
+              ['S', 'M', 'T', 'W', 'T', 'F', 'S'][dayIndex],
+              isToday: todayIndex == dayIndex,
+              score: 0,
+              isAfterToday: todayIndex < dayIndex,
+              isSkipped: reminderState.maybeWhen(
+                data: (r) => r != null ? !r.days[dayIndex] : false,
+                orElse: () => false,
+              ),
+            ),
+          )
           .toList(),
     );
   }
 
   Widget _buildTodayScore(WidgetRef ref) {
-    final streakProvider = ref.watch(streakControllerProvider.notifier);
+    final streakController = ref.watch(streakControllerProvider.notifier);
     final parser = EmojiParser();
 
     return Padding(
@@ -161,78 +169,34 @@ class StreakCard extends ConsumerWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              GestureDetector(
-                onTap: () {
-                  Streak s =
-                      Streak(score: 0, createdAt: tz.TZDateTime.now(tz.local));
-                  streakProvider.addStreak(s);
+              _scoreButton(
+                label: parser.emojify('Poor :thumbsdown:'),
+                onPressed: () async {
+                  await streakController.addStreak(
+                    Streak(score: 0, createdAt: tz.TZDateTime.now(tz.local)),
+                  );
+                  ref.invalidate(streakProvider);
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0,
-                      horizontal: 16.0), // Adjust padding as needed
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                        30.0), // Makes the container rounded
-                  ),
-                  child: Text(
-                    parser.emojify('Poor :thumbsdown:'),
-                    style: TextStyle(
-                      color: MyColors.primaryDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
-                    ),
-                  ),
-                ),
               ),
-              const SizedBox(
-                  width: 16), // Adjust this for spacing between buttons
-              GestureDetector(
-                onTap: () {
-                  // Handle button press here
+              const SizedBox(width: 12),
+              _scoreButton(
+                label: parser.emojify('Good :thumbsup:'),
+                onPressed: () async {
+                  await streakController.addStreak(
+                    Streak(score: 1, createdAt: tz.TZDateTime.now(tz.local)),
+                  );
+                  ref.invalidate(streakProvider);
                 },
-                child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0,
-                        horizontal: 16.0), // Adjust padding as needed
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                          30.0), // Makes the container rounded
-                    ),
-                    child: Text(
-                      parser.emojify('Good :thumbsup:'),
-                      style: TextStyle(
-                        color: MyColors.primaryDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.0,
-                      ),
-                    )),
               ),
-              const SizedBox(
-                  width: 16), // Adjust this for spacing between buttons
-              GestureDetector(
-                onTap: () {
-                  // Handle button press here
+              const SizedBox(width: 12),
+              _scoreButton(
+                label: parser.emojify('Great :fire:'),
+                onPressed: () async {
+                  await streakController.addStreak(
+                    Streak(score: 2, createdAt: tz.TZDateTime.now(tz.local)),
+                  );
+                  ref.invalidate(streakProvider);
                 },
-                child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0,
-                        horizontal: 16.0), // Adjust padding as needed
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                          30.0), // Makes the container rounded
-                    ),
-                    child: Text(
-                      parser.emojify('Great :fire:'),
-                      style: TextStyle(
-                        color: MyColors.primaryDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.0,
-                      ),
-                    )),
               ),
             ],
           ),
@@ -241,11 +205,32 @@ class StreakCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildDayCircle(String day,
-      {bool isSkipped = false,
-      bool isAfterToday = false,
-      bool isToday = false,
-      int score = 0}) {
+  Widget _scoreButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: MyColors.primaryDark,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _buildDayCircle(
+    String day, {
+    bool isSkipped = false,
+    bool isAfterToday = false,
+    bool isToday = false,
+    int score = 0,
+  }) {
     Color foregroundColor = MyColors.primaryDark;
     Color backgroundColor = MyColors.primaryDark;
 
@@ -256,12 +241,12 @@ class StreakCard extends ConsumerWidget {
 
     if (isAfterToday) {
       foregroundColor = Colors.white;
-      backgroundColor = MyColors.primaryDark.withOpacity(0.3);
+      backgroundColor = MyColors.primaryDark.withValues(alpha: 0.3);
     }
 
     if (isSkipped && !isToday) {
-      foregroundColor = MyColors.primaryDark.withOpacity(0.3);
-      backgroundColor = MyColors.primaryDark.withOpacity(0.1);
+      foregroundColor = MyColors.primaryDark.withValues(alpha: 0.3);
+      backgroundColor = MyColors.primaryDark.withValues(alpha: 0.1);
     }
 
     return Stack(
@@ -270,8 +255,8 @@ class StreakCard extends ConsumerWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: MyColors.primaryDark.withOpacity(0.1), // Set border color
-              width: 1.0, // Set border width
+              color: MyColors.primaryDark.withValues(alpha: 0.1),
+              width: 1.0,
             ),
           ),
           child: CircleAvatar(

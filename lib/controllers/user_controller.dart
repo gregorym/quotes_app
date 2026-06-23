@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive/hive.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:uuid/uuid.dart';
@@ -20,32 +21,30 @@ class UserController extends StateNotifier<User?> {
 
   // fetch user
   Future<User> fetchUser() async {
-    var box = await Hive.openBox(_boxName);
+    final box = await Hive.openBox(_boxName);
     if (!box.containsKey(_boxName)) {
-      User u = User(
-          id: uuid.v4(), lastOpened: tz.TZDateTime.now(tz.local), createdAt: tz.TZDateTime.now(tz.local));
-      await box.put(_boxName, u.toJson());
+      final now = tz.TZDateTime.now(tz.local);
+      final user = User(id: uuid.v4(), lastOpened: now, createdAt: now);
+      await box.put(_boxName, user.toJson());
     }
 
-    var data = box.get(_boxName) as Map<dynamic, dynamic>?;
+    final data = box.get(_boxName) as Map<dynamic, dynamic>?;
     data!['lastOpened'] = tz.TZDateTime.now(tz.local).toString();
-    User u = User.fromJson(data);
+    final user = User.fromJson(data);
 
-    await box.put(_boxName, u.toJson());
-    setUser(u);
-    return u;
+    await box.put(_boxName, user.toJson());
+    setUser(user);
+    return user;
   }
 
   Future<void> updateUserName(String name) async {
-    var box = await Hive.openBox(_boxName);
-    if (box.containsKey(_boxName)) {
-      var data = box.get(_boxName) as Map<dynamic, dynamic>;
-      data['name'] = name;
-      User updatedUser = User.fromJson(data);
-      await box.put(_boxName, updatedUser.toJson());
-      setUser(updatedUser);
-    } else {
-      print('No existing user data found!');
-    }
+    final box = await Hive.openBox(_boxName);
+    if (!box.containsKey(_boxName)) return;
+
+    final data = box.get(_boxName) as Map<dynamic, dynamic>;
+    data['name'] = name;
+    final updatedUser = User.fromJson(data);
+    await box.put(_boxName, updatedUser.toJson());
+    setUser(updatedUser);
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_font_picker/flutter_font_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:group_button/group_button.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../utils/font_family.dart';
 import '../themes/colors.dart';
@@ -12,7 +11,9 @@ import '../widgets/color_picker.dart';
 import '../widgets/icon_solid_light.dart';
 
 class CreateQuotePage extends ConsumerStatefulWidget {
-  const CreateQuotePage({super.key});
+  const CreateQuotePage({super.key, this.showBackButton = true});
+
+  final bool showBackButton;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -45,12 +46,15 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        leadingWidth: 76,
+        automaticallyImplyLeading: widget.showBackButton,
+        leadingWidth: widget.showBackButton ? 76 : 0,
         toolbarHeight: 66,
-        leading: IconSolidLight(
-          icon: PhosphorIcons.regular.caretLeft,
-          onTap: () => Navigator.pop(context),
-        ),
+        leading: widget.showBackButton
+            ? IconSolidLight(
+                icon: Icons.chevron_left,
+                onTap: () => Navigator.pop(context),
+              )
+            : null,
         actions: [
           UnconstrainedBox(
             child: TextButton(
@@ -73,9 +77,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
               },
               child: Text(
                 "DONE",
-                style: MyTypography.body1.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: MyTypography.body1.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -89,10 +91,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Write a Quote",
-                style: MyTypography.h2,
-              ),
+              Text("Write a Quote", style: MyTypography.h2),
               const SizedBox(height: 20),
               Column(
                 children: [
@@ -149,9 +148,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 30.0,
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 30.0),
                     decoration: DottedDecoration(
                       color: Colors.white,
                       strokeWidth: 2,
@@ -197,9 +194,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                           color: Colors.white,
                           height: 30,
                           width: 1,
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                          ),
+                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
                         ),
                         Flexible(
                           child: TextField(
@@ -230,9 +225,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
                   "Note: If you dont fill Author name and Profession, we will use your name and profession.",
-                  style: MyTypography.caption1.copyWith(
-                    color: MyColors.black,
-                  ),
+                  style: MyTypography.caption1.copyWith(color: MyColors.black),
                 ),
               ),
               const SizedBox(height: 30),
@@ -308,13 +301,13 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                       IconData? icon;
                       switch (index) {
                         case 0:
-                          icon = PhosphorIcons.regular.textAlignLeft;
+                          icon = Icons.format_align_left;
                           break;
                         case 1:
-                          icon = PhosphorIcons.regular.textAlignCenter;
+                          icon = Icons.format_align_center;
                           break;
                         case 2:
-                          icon = PhosphorIcons.regular.textAlignRight;
+                          icon = Icons.format_align_right;
                           break;
                         default:
                       }
@@ -326,9 +319,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                           borderRadius: BorderRadius.circular(5),
                           color: selected ? MyColors.secondary : Colors.white,
                         ),
-                        child: Center(
-                          child: Icon(icon),
-                        ),
+                        child: Center(child: Icon(icon)),
                       );
                     },
                     options: GroupButtonOptions(
@@ -426,7 +417,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         }
                       });
                     },
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -474,9 +465,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey[300]!,
-                        ),
+                        border: Border.all(color: Colors.grey[300]!),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Row(
@@ -487,14 +476,8 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                                   selectedFont!.fontFamily,
                                   style: selectedFont!.toTextStyle(),
                                 )
-                              : Text(
-                                  "Select font",
-                                  style: MyTypography.body2,
-                                ),
-                          Icon(
-                            PhosphorIcons.regular.caretDown,
-                            size: 16,
-                          ),
+                              : Text("Select font", style: MyTypography.body2),
+                          const Icon(Icons.keyboard_arrow_down, size: 16),
                         ],
                       ),
                     ),

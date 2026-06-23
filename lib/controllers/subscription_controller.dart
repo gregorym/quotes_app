@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../utils/error_handling.dart';
@@ -42,7 +43,7 @@ class SubscriptionController extends ChangeNotifier {
       notifyListeners();
       return response.productDetails.isNotEmpty;
     } catch (e) {
-      final err = ErrorHandling.getErrorMessage(e);
+      debugPrint(ErrorHandling.getErrorMessage(e));
       _isReady = false;
       notifyListeners();
       return false;
@@ -58,11 +59,10 @@ class SubscriptionController extends ChangeNotifier {
         return;
       }
 
-      final ProductDetailsResponse response =
-          await InAppPurchase.instance.queryProductDetails({'premium'});
+      await InAppPurchase.instance.queryProductDetails({'premium'});
       _isReady = true;
     } catch (e) {
-      final err = ErrorHandling.getErrorMessage(e);
+      debugPrint(ErrorHandling.getErrorMessage(e));
     }
   }
 }

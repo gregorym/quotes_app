@@ -2,46 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:quotes_app/views/themes/colors.dart';
 
 class MyTheme {
+  static MaterialColor _swatch(Color color) {
+    return MaterialColor(
+      color.toARGB32(),
+      <int, Color>{
+        50: color.withValues(alpha: 0.1),
+        100: color.withValues(alpha: 0.2),
+        200: color.withValues(alpha: 0.3),
+        300: color.withValues(alpha: 0.4),
+        400: color.withValues(alpha: 0.5),
+        500: color.withValues(alpha: 0.6),
+        600: color.withValues(alpha: 0.7),
+        700: color.withValues(alpha: 0.8),
+        800: color.withValues(alpha: 0.9),
+        900: color,
+      },
+    );
+  }
+
   // Light Theme
   static final lightTheme = ThemeData(
-    colorSchemeSeed: MaterialColor(
-      MyColors.primary.value,
-      <int, Color>{
-        50: MyColors.primary.withOpacity(0.1),
-        100: MyColors.primary.withOpacity(0.2),
-        200: MyColors.primary.withOpacity(0.3),
-        300: MyColors.primary.withOpacity(0.4),
-        400: MyColors.primary.withOpacity(0.5),
-        500: MyColors.primary.withOpacity(0.6),
-        600: MyColors.primary.withOpacity(0.7),
-        700: MyColors.primary.withOpacity(0.8),
-        800: MyColors.primary.withOpacity(0.9),
-        900: MyColors.primary.withOpacity(1.0),
-      },
-    ),
+    colorSchemeSeed: _swatch(MyColors.primary),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     scaffoldBackgroundColor: Colors.white,
   );
 
   // Dark Theme
-  // TODO: Add dark theme colors
   static final darkTheme = ThemeData(
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorSchemeSeed: MaterialColor(
-      MyColors.secondary.value,
-      <int, Color>{
-        50: MyColors.secondary.withOpacity(0.1),
-        100: MyColors.secondary.withOpacity(0.2),
-        200: MyColors.secondary.withOpacity(0.3),
-        300: MyColors.secondary.withOpacity(0.4),
-        400: MyColors.secondary.withOpacity(0.5),
-        500: MyColors.secondary.withOpacity(0.6),
-        600: MyColors.secondary.withOpacity(0.7),
-        700: MyColors.secondary.withOpacity(0.8),
-        800: MyColors.secondary.withOpacity(0.9),
-        900: MyColors.secondary.withOpacity(1.0),
-      },
-    ),
+    colorSchemeSeed: _swatch(MyColors.secondary),
     scaffoldBackgroundColor: MyColors.primaryDark,
     appBarTheme: AppBarTheme(
       backgroundColor: MyColors.primaryDark,

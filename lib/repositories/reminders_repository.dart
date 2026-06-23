@@ -13,8 +13,6 @@ final remindersRepositoryProvider =
     Provider<RemindersRepository>((ref) => RemindersRepository());
 
 class RemindersRepository {
-  final String _boxName = 'userBox';
-
   Future<List<Reminder>> getReminders(String query) async {
     return [];
   }
@@ -30,9 +28,7 @@ class RemindersRepository {
 
   // Create a reminder
   Future<void> createReminders(Reminder reminder) async {
-    try {
-
-    } catch (e) {
+    try {} catch (e) {
       rethrow;
     }
   }
@@ -47,7 +43,7 @@ class RemindersRepository {
 
   Future<void> deleteReminder(int id) async {
     try {
-      flutterLocalNotificationsPlugin.cancel(id);
+      await flutterLocalNotificationsPlugin.cancel(id: id);
     } catch (e) {
       rethrow;
     }
@@ -56,7 +52,7 @@ class RemindersRepository {
   int randomId() {
     int min = 5;
     int max = 10;
-    
+
     var random = Random();
     return min + random.nextInt(max + 1 - min);
   }
@@ -84,8 +80,7 @@ class RemindersRepository {
           flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
 
-      final bool? grantedNotificationPermission =
-          await androidImplementation?.requestNotificationsPermission();
+      await androidImplementation?.requestNotificationsPermission();
     }
   }
 
@@ -112,11 +107,14 @@ class RemindersRepository {
           ?.createNotificationChannel(channel);
     }
 
-    flutterLocalNotificationsPlugin.zonedSchedule(
-        id, title, body, time, platformChannelSpecifics,
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time);
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: time,
+      notificationDetails: platformChannelSpecifics,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
   }
 }

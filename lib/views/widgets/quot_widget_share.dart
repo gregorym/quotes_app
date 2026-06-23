@@ -1,7 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../models/quote_model.dart';
 
@@ -46,11 +45,7 @@ class QuotWidgetShare extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(
-                  PhosphorIcons.fill.quotes,
-                  size: 70,
-                  color: Colors.white
-                ),
+                const Icon(Icons.format_quote, size: 70, color: Colors.white),
                 const SizedBox(height: 20),
                 Expanded(
                   child: AutoSizeText(
@@ -61,7 +56,7 @@ class QuotWidgetShare extends StatelessWidget {
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
                       color: Colors.white,
-                      fontSize:  28,
+                      fontSize: 28,
                       fontWeight: FontWeight.w600,
                       height: 1.3,
                     ),

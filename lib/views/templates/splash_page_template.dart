@@ -1,44 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quotes_app/views/templates/quotes_page_template.dart';
-import 'package:quotes_app/views/templates/welcome_template.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../controllers/user_controller.dart';
+import '../../models/user_model.dart';
 
-class SplashPage extends ConsumerWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
-  void startSplash(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
-    // Check if the user was created less than 10 seconds ago
-    if (user.value != null) {
-      final now = tz.TZDateTime.now(tz.local);
-      final userCreated = user.value!.createdAt;
-      final difference = now.difference(userCreated!).inSeconds;
-      // Wait 2 seconds before navigating to the welcome page
-        Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => difference < 10 ?  WelcomePage() : QuotesPage()
-            ),
-          );
-        });
-      }
-    }
+  @override
+  ConsumerState<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends ConsumerState<SplashPage> {
+  bool _started = false;
+
+  void _startSplash(User user) {
+    if (_started) return;
+    _started = true;
+
+    final now = tz.TZDateTime.now(tz.local);
+    final createdAt = user.createdAt ?? now;
+    final showWelcome = now.difference(createdAt).inSeconds < 10;
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      context.go(showWelcome ? '/welcome' : '/quotes');
+    });
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    startSplash(context, ref);
+  Widget build(BuildContext context) {
+    ref.watch(userProvider).whenData(_startSplash);
 
     return Scaffold(
-      body: Center(
-        child: Image.asset(
-          'assets/logo.png',
-          width: 90,
-        ),
-      ),
+      body: Center(child: Image.asset('assets/logo.png', width: 90)),
     );
   }
 }

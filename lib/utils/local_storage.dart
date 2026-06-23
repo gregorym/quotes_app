@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class LocalStorage {
   final _storage = const FlutterSecureStorage();
 
-  Future getSession() async {
+  Future<dynamic> getSession() async {
     final session = await _storage.read(key: 'session');
 
     if (session != null) {
@@ -15,8 +15,8 @@ class LocalStorage {
     return null;
   }
 
-  Future<void> setSession(param0) async {
-    await _storage.write(key: 'session', value: "{}");
+  Future<void> setSession(Object? session) async {
+    await _storage.write(key: 'session', value: jsonEncode(session ?? {}));
   }
 
   Future<void> deleteSession() async {

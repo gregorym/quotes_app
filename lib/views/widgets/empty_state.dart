@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../themes/colors.dart';
 import '../themes/typography.dart';
@@ -24,8 +23,8 @@ class EmptyState extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
             ),
             padding: const EdgeInsets.all(40),
-            child: Icon(
-              PhosphorIcons.fill.quotes,
+            child: const Icon(
+              Icons.format_quote,
               size: 48,
             ),
           ),
