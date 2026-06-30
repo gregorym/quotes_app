@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Quotes App</string>
+		<string>No Excuses</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>quotes_app</string>
+		<string>No Excuses</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -86,7 +86,7 @@
 		<key>FacebookClientToken</key>
 		<string>6e140c86236247c8301b18bd6b80bd21</string>
 		<key>FacebookDisplayName</key>
-		<string>Quot</string>
+		<string>No Excuses</string>
 
 		<key>NSBonjourServices</key>
 		<array>

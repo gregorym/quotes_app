@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
       builder: (context) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Quotes App',
+          title: 'No Excuses',
           themeMode: ThemeMode.dark,
           darkTheme: MyTheme.darkTheme,
           theme: MyTheme.darkTheme,
