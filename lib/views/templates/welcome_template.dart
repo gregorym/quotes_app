@@ -23,7 +23,7 @@ class WelcomePage extends StatelessWidget {
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
-                      "assets/welcome_background.webp",
+                      "assets/images/welcome_background.webp",
                     ), // Add your image to the assets folder and reference it here
                     fit: BoxFit.cover,
                   ),

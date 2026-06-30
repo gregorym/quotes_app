@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,7 +49,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlutterWebFrame(
-      maximumSize: const Size(390, double.infinity),
+      enabled: kIsWeb,
+      maximumSize: const Size(390, 844),
       builder: (context) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,

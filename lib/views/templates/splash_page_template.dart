@@ -35,7 +35,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     ref.watch(userProvider).whenData(_startSplash);
 
     return Scaffold(
-      body: Center(child: Image.asset('assets/logo.png', width: 90)),
+      body: Center(child: Image.asset('assets/images/logo.png', width: 90)),
     );
   }
 }

@@ -34,7 +34,7 @@ class QuotWidgetShare extends StatelessWidget {
               left: 168 + 30,
               top: -70 - 10,
               child: Image.asset(
-                "assets/img_bg_pattern.png",
+                "assets/images/img_bg_pattern.png",
                 width: 254,
               ),
             ),

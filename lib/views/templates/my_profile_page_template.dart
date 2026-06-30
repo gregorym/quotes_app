@@ -39,7 +39,7 @@ class MyProfile extends StatelessWidget {
                   const Image(
                     height: 64,
                     width: 64,
-                    image: AssetImage('assets/avatar.png'),
+                    image: AssetImage('assets/images/avatar.png'),
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -69,7 +69,7 @@ class MyProfile extends StatelessWidget {
                     child: const Image(
                       height: 32,
                       width: 32,
-                      image: AssetImage('assets/pencil.png'),
+                      image: AssetImage('assets/images/pencil.png'),
                     ),
                   ),
                 ],
@@ -158,7 +158,7 @@ class MyProfile extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Image(image: AssetImage('assets/sabit.png')),
+                    const Image(image: AssetImage('assets/images/sabit.png')),
                     const SizedBox(width: 16),
                     Text(
                       'Night mode',
@@ -198,7 +198,7 @@ class MyProfile extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Image(image: AssetImage('assets/ask.png')),
+                    const Image(image: AssetImage('assets/images/ask.png')),
                     const SizedBox(width: 16),
                     Text(
                       'Help & Support',
@@ -217,7 +217,8 @@ class MyProfile extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Image(image: AssetImage('assets/feedback.png')),
+                    const Image(
+                        image: AssetImage('assets/images/feedback.png')),
                     const SizedBox(width: 16),
                     Text(
                       'Feedback',

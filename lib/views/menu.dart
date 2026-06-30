@@ -49,7 +49,7 @@ class _MenuState extends State<Menu> {
         onTap: _handleIndexChanged,
         dotIndicatorColor: MyColors.black,
         backgroundColor: MyColors.secondary,
-        // enableFloatingNavBar: false,
+        enableFloatingNavBar: false,
         paddingR: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         enablePaddingAnimation: false,
         selectedItemColor: MyColors.secondary,
@@ -74,23 +74,23 @@ class _MenuState extends State<Menu> {
     switch (tab) {
       case _SelectedTab.quotes:
         asset = isSelected
-            ? "assets/ic_quotes_filled.png"
-            : "assets/ic_quotes_outlined.png";
+            ? "assets/images/ic_quotes_filled.png"
+            : "assets/images/ic_quotes_outlined.png";
         break;
       case _SelectedTab.create:
         asset = isSelected
-            ? "assets/ic_create_filled.png"
-            : "assets/ic_create_outlined.png";
+            ? "assets/images/ic_create_filled.png"
+            : "assets/images/ic_create_outlined.png";
         break;
       case _SelectedTab.favorite:
         asset = isSelected
-            ? "assets/ic_favorite_filled.png"
-            : "assets/ic_favorite_outlined.png";
+            ? "assets/images/ic_favorite_filled.png"
+            : "assets/images/ic_favorite_outlined.png";
         break;
       case _SelectedTab.profile:
         asset = isSelected
-            ? "assets/ic_user_filled.png"
-            : "assets/ic_user_outlined.png";
+            ? "assets/images/ic_user_filled.png"
+            : "assets/images/ic_user_outlined.png";
         break;
     }
 
