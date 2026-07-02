@@ -4,38 +4,50 @@ import 'package:quotes_app/views/themes/colors.dart';
 
 class MyTypography {
   // * Headings
-  static TextStyle h1 = GoogleFonts.epilogue(
-    fontSize: 32,
-    fontWeight: FontWeight.w700,
+  static TextStyle h1 = GoogleFonts.getFont(
+    'Nunito Sans',
+    fontSize: 34,
+    fontWeight: FontWeight.w900,
     color: MyColors.black,
+    height: 1.12,
   );
-  static TextStyle h2 = GoogleFonts.epilogue(
-    fontSize: 24,
-    fontWeight: FontWeight.w700,
+  static TextStyle h2 = GoogleFonts.getFont(
+    'Nunito Sans',
+    fontSize: 28,
+    fontWeight: FontWeight.w900,
     color: MyColors.black,
+    height: 1.12,
   );
-  static TextStyle h3 = GoogleFonts.inter(
-    fontSize: 20,
-    fontWeight: FontWeight.w700,
+  static TextStyle h3 = GoogleFonts.getFont(
+    'Nunito Sans',
+    fontSize: 22,
+    fontWeight: FontWeight.w900,
     color: MyColors.black,
+    height: 1.12,
   );
 
   // * Body
-  static TextStyle body1 = GoogleFonts.inter(
+  static TextStyle body1 = GoogleFonts.getFont(
+    'Nunito Sans',
     fontSize: 16,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     color: MyColors.black,
+    height: 1.25,
   );
-  static TextStyle body2 = GoogleFonts.inter(
+  static TextStyle body2 = GoogleFonts.getFont(
+    'Nunito Sans',
     fontSize: 14,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w500,
     color: MyColors.black,
+    height: 1.25,
   );
 
   // * Caption
-  static TextStyle caption1 = GoogleFonts.inter(
+  static TextStyle caption1 = GoogleFonts.getFont(
+    'Nunito Sans',
     fontSize: 12,
-    fontWeight: FontWeight.w400,
-    color: Colors.grey,
+    fontWeight: FontWeight.w500,
+    color: MyColors.muted,
+    height: 1.25,
   );
 }

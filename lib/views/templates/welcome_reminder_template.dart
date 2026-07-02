@@ -12,8 +12,7 @@ class WelcomeReminderTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MyColors
-          .primaryDark, // make sure to define MyColors class with secondary color
+      backgroundColor: MyColors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -33,7 +32,7 @@ class WelcomeReminderTemplate extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
-                      color: Colors.white,
+                      color: MyColors.ink,
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
                       height: 1.3,
@@ -58,7 +57,7 @@ class WelcomeReminderTemplate extends StatelessWidget {
                       context.push('/subscription');
                     },
                     style: TextButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: MyColors.primary,
                         padding: const EdgeInsets.all(16.0),
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(32.0)),
@@ -66,8 +65,9 @@ class WelcomeReminderTemplate extends StatelessWidget {
                     child: const Text(
                       'Continue',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontSize: 18.0,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),

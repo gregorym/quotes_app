@@ -1,23 +1,29 @@
 import 'dart:ui';
 
 class MyColors {
-  static Color primary = const Color.fromARGB(255, 53, 66, 98);
-  static Color primaryDark = const Color.fromARGB(255, 5, 17, 43);
-  static Color secondary = const Color(0xffFEF0F1);
-  static Color black = const Color(0xff323842);
+  static const Color background = Color(0xFFEDEBE6);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color ink = Color(0xFF303033);
+  static const Color muted = Color(0xFF8F8F8F);
+  static const Color primary = Color(0xFF79BE7A);
+  static const Color teal = Color(0xFF78B6C2);
+  static const Color orange = Color(0xFFDFA174);
+  static const Color pink = Color(0xFFE86E7B);
+  static const Color selected = Color(0xFFE1E8DC);
+  static const Color disabled = Color(0xFFC9C6C1);
+  static const Color darkPanel = Color(0xFF303030);
+
+  static const Color primaryDark = background;
+  static const Color secondary = surface;
+  static const Color black = ink;
 
   // Quote Card Colors
-  static List<int> quoteCardColors = [
-    0xff00B7A8,
-    0xff27374D,
-    0xffFF2E63,
-    0xff4069E5,
-    0xff8294C4,
-    0xffAAC8A7,
-    0xffE76161,
-    0xff5C4B99,
-    0xffFFCC70,
-    0xffF1B9C85,
-    0xff47B5FF,
+  static const List<int> quoteCardColors = [
+    0xFF303030,
+    0xFF79BE7A,
+    0xFF78B6C2,
+    0xFFDFA174,
+    0xFFE86E7B,
+    0xFFE1E8DC,
   ];
 }

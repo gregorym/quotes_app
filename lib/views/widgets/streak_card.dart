@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quotes_app/controllers/streak_controller.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../controllers/reminder_controller.dart';
 import '../../models/streak_model.dart';
 import '../themes/colors.dart';
+import '../themes/typography.dart';
 
 class StreakCard extends ConsumerWidget {
   const StreakCard({super.key});
@@ -47,20 +47,16 @@ class StreakCard extends ConsumerWidget {
           children: [
             Text(
               "Streak",
-              style: GoogleFonts.getFont(
-                "Nunito Sans",
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: MyTypography.h3,
             ),
           ],
         ),
+        const SizedBox(height: 12),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: MyColors.primary,
+            borderRadius: BorderRadius.circular(8),
+            color: MyColors.darkPanel,
           ),
           child: Stack(
             children: [
@@ -69,7 +65,7 @@ class StreakCard extends ConsumerWidget {
                 top: 25,
                 child: Icon(
                   Icons.local_fire_department,
-                  color: Colors.deepOrangeAccent.withValues(alpha: 0.5),
+                  color: MyColors.orange.withValues(alpha: 0.55),
                   size: 120,
                 ),
               ),
@@ -158,11 +154,9 @@ class StreakCard extends ConsumerWidget {
         children: [
           Text(
             "How was today?",
-            style: GoogleFonts.getFont(
-              "Nunito Sans",
+            style: MyTypography.body1.copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+              fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 16),
@@ -213,7 +207,7 @@ class StreakCard extends ConsumerWidget {
       onPressed: onPressed,
       style: TextButton.styleFrom(
         backgroundColor: Colors.white,
-        foregroundColor: MyColors.primaryDark,
+        foregroundColor: MyColors.ink,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
@@ -231,22 +225,22 @@ class StreakCard extends ConsumerWidget {
     bool isToday = false,
     int score = 0,
   }) {
-    Color foregroundColor = MyColors.primaryDark;
-    Color backgroundColor = MyColors.primaryDark;
+    Color foregroundColor = Colors.white;
+    Color backgroundColor = Colors.white.withValues(alpha: 0.12);
 
     if (isToday) {
-      foregroundColor = MyColors.primaryDark;
+      foregroundColor = MyColors.ink;
       backgroundColor = Colors.white;
     }
 
     if (isAfterToday) {
-      foregroundColor = Colors.white;
-      backgroundColor = MyColors.primaryDark.withValues(alpha: 0.3);
+      foregroundColor = Colors.white.withValues(alpha: 0.55);
+      backgroundColor = Colors.white.withValues(alpha: 0.10);
     }
 
     if (isSkipped && !isToday) {
-      foregroundColor = MyColors.primaryDark.withValues(alpha: 0.3);
-      backgroundColor = MyColors.primaryDark.withValues(alpha: 0.1);
+      foregroundColor = Colors.white.withValues(alpha: 0.28);
+      backgroundColor = Colors.white.withValues(alpha: 0.06);
     }
 
     return Stack(
@@ -255,7 +249,7 @@ class StreakCard extends ConsumerWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: MyColors.primaryDark.withValues(alpha: 0.1),
+              color: Colors.white.withValues(alpha: 0.08),
               width: 1.0,
             ),
           ),

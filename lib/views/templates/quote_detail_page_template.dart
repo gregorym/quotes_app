@@ -1,10 +1,16 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/quote_model.dart';
+import '../../repositories/favorite_repository.dart';
+import '../themes/colors.dart';
 import '../themes/typography.dart';
 import '../widgets/icon_solid_light.dart';
+import '../widgets/snackbar.dart';
 
-class QuoteDetailPage extends StatelessWidget {
+class QuoteDetailPage extends ConsumerWidget {
   const QuoteDetailPage({
     super.key,
     required this.content,
@@ -18,11 +24,12 @@ class QuoteDetailPage extends StatelessWidget {
   final String authorJob;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      backgroundColor: MyColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: MyColors.background,
         leadingWidth: 76,
         leading: IconSolidLight(
           icon: Icons.chevron_left,
@@ -45,15 +52,15 @@ class QuoteDetailPage extends StatelessWidget {
           vertical: 50,
         ),
         decoration: BoxDecoration(
-          color: Colors.blueAccent,
-          borderRadius: BorderRadius.circular(36),
+          color: MyColors.surface,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           children: [
             const Icon(
               Icons.format_quote,
               size: 70,
-              color: Colors.white,
+              color: MyColors.teal,
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -64,7 +71,7 @@ class QuoteDetailPage extends StatelessWidget {
                 maxLines: 10,
                 textAlign: TextAlign.center,
                 style: MyTypography.body1.copyWith(
-                  color: Colors.white,
+                  color: MyColors.ink,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
@@ -86,16 +93,15 @@ class QuoteDetailPage extends StatelessWidget {
                       Text(
                         author,
                         style: MyTypography.body2.copyWith(
-                          color: Colors.white,
+                          color: MyColors.ink,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
                         ),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         authorJob,
                         style: MyTypography.caption1.copyWith(
-                          color: Colors.white70,
+                          color: MyColors.muted,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -108,18 +114,34 @@ class QuoteDetailPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const IconSolidLight(
+                IconSolidLight(
                   icon: Icons.favorite,
+                  onTap: () async {
+                    await ref.read(favoriteRepositoryProvider).addFavoriteQuote(
+                          Quote(id: content, content: content),
+                        );
+                    ref.invalidate(favoriteQuotesProvider);
+                    if (!context.mounted) return;
+                    showSnackbar(
+                      context,
+                      'Added to favorites.',
+                      isError: false,
+                    );
+                  },
                 ),
                 const SizedBox(width: 16),
                 // share button with icon
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: content));
+                    if (!context.mounted) return;
+                    showSnackbar(context, 'Quote copied.', isError: false);
+                  },
                   icon: const Icon(Icons.share),
                   label: const Text("Share"),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.white,
+                    backgroundColor: MyColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50),
                     ),

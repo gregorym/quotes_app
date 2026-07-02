@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:quotes_app/models/quotable_model.dart';
 import 'package:quotes_app/models/quote_model.dart';
@@ -28,12 +29,26 @@ class QuotesRepository {
   }
 
   Future<List<Quotable>> searchQuotes(String query) async {
-    return [];
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) return [];
+
+    final quotes = await getRandomQuotes();
+    return quotes
+        .where((quote) =>
+            (quote.content ?? '').toLowerCase().contains(normalizedQuery))
+        .toList();
   }
 
   // Create a quote
   Future<void> createQuote(Quote quote) async {
-    try {} catch (e) {
+    try {
+      final box = await Hive.openBox('createdQuotesBox');
+      final id = quote.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+      await box.put(
+          id,
+          Quote(id: id, content: quote.content, categories: quote.categories)
+              .toJson());
+    } catch (e) {
       log(e.toString());
       rethrow;
     }
@@ -42,8 +57,11 @@ class QuotesRepository {
   // Get quotes by me
   Future<List<Quote>> getQuotesByMe() async {
     try {
-      List<Quote> quotes = [];
-      return quotes;
+      final box = await Hive.openBox('createdQuotesBox');
+      return box.values
+          .whereType<Map<dynamic, dynamic>>()
+          .map((data) => Quote.fromJson(Map<String, dynamic>.from(data)))
+          .toList();
     } catch (e) {
       log(e.toString());
       rethrow;
@@ -52,7 +70,10 @@ class QuotesRepository {
 
   // delete a quote
   Future<void> deleteQuote(Quote quote) async {
-    try {} catch (e) {
+    try {
+      final box = await Hive.openBox('createdQuotesBox');
+      await box.delete(quote.id ?? quote.content);
+    } catch (e) {
       log(e.toString());
       rethrow;
     }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../themes/colors.dart';
 import '../themes/typography.dart';
+import '../widgets/snackbar.dart';
 
 class MyProfile extends StatelessWidget {
   const MyProfile({super.key});
@@ -11,9 +11,10 @@ class MyProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MyColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: MyColors.background,
         toolbarHeight: 66,
         title: Text(
           "My Profile",
@@ -31,8 +32,8 @@ class MyProfile extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: MyColors.secondary,
-                borderRadius: BorderRadius.circular(15),
+                color: MyColors.surface,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
@@ -47,25 +48,22 @@ class MyProfile extends StatelessWidget {
                     children: [
                       Text(
                         'Kris Watson',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: MyColors.black,
-                        ),
+                        style: MyTypography.body1
+                            .copyWith(fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         'Ad ullamco',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: MyColors.black,
-                        ),
+                        style: MyTypography.body2,
                       ),
                     ],
                   ),
                   const Spacer(),
                   InkWell(
-                    onTap: () {},
+                    onTap: () => showSnackbar(
+                      context,
+                      'Profile editing needs account storage.',
+                    ),
                     child: const Image(
                       height: 32,
                       width: 32,
@@ -82,42 +80,46 @@ class MyProfile extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(15),
+                  onTap: () => showSnackbar(
+                    context,
+                    'Delete account needs account backend.',
+                  ),
+                  borderRadius: BorderRadius.circular(28),
                   child: Container(
                     height: 44,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(28),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.local_fire_department,
                           size: 16,
-                          color: MyColors.primary,
+                          color: MyColors.pink,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Delete Account',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: const Color(0xFFE05858),
-                          ),
+                          style:
+                              MyTypography.body2.copyWith(color: MyColors.pink),
                         ),
                       ],
                     ),
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
-                  borderRadius: BorderRadius.circular(15),
+                  onTap: () => showSnackbar(
+                    context,
+                    'Sign out needs auth integration.',
+                  ),
+                  borderRadius: BorderRadius.circular(28),
                   child: Container(
                     height: 44,
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: const Color(0xFFFEF0F1),
+                      borderRadius: BorderRadius.circular(28),
+                      color: MyColors.selected,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -125,15 +127,13 @@ class MyProfile extends StatelessWidget {
                         Icon(
                           Icons.logout,
                           size: 16,
-                          color: MyColors.primary,
+                          color: MyColors.pink,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Sign Out',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: const Color(0xFFE05858),
-                          ),
+                          style:
+                              MyTypography.body2.copyWith(color: MyColors.pink),
                         ),
                       ],
                     ),
@@ -150,10 +150,7 @@ class MyProfile extends StatelessWidget {
               children: [
                 Text(
                   'Appearance'.toUpperCase(),
-                  style: GoogleFonts.epilogue(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: MyTypography.caption1,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -162,24 +159,25 @@ class MyProfile extends StatelessWidget {
                     const SizedBox(width: 16),
                     Text(
                       'Night mode',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                      ),
+                      style: MyTypography.body2,
                     ),
                     const Spacer(),
                     GFToggle(
-                      onChanged: (val) {},
+                      onChanged: (val) => showSnackbar(
+                        context,
+                        'Night mode needs theme persistence.',
+                      ),
                       value: true,
                       type: GFToggleType.ios,
                       boxShape: BoxShape.circle,
                       enabledThumbColor: Colors.white,
-                      enabledTrackColor: const Color(0xFFE05858),
+                      enabledTrackColor: MyColors.primary,
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 const Divider(
-                  color: Color(0xFFDEE1E6),
+                  color: MyColors.disabled,
                   height: 0.2,
                   endIndent: 0,
                   thickness: 1,
@@ -189,49 +187,54 @@ class MyProfile extends StatelessWidget {
                 // other setting
                 Text(
                   'Other Settings'.toUpperCase(),
-                  style: GoogleFonts.epilogue(
-                    fontSize: 14,
-                    color: Colors.grey,
+                  style: MyTypography.caption1,
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () => showSnackbar(
+                    context,
+                    'Help support needs a support URL or contact channel.',
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Image(image: AssetImage('assets/images/ask.png')),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Help & Support',
+                        style: MyTypography.body2,
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Colors.grey,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Image(image: AssetImage('assets/images/ask.png')),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Help & Support',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
+                InkWell(
+                  onTap: () => showSnackbar(
+                    context,
+                    'Feedback needs a destination URL or mail channel.',
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Image(
+                          image: AssetImage('assets/images/feedback.png')),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Feedback',
+                        style: MyTypography.body2,
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Image(
-                        image: AssetImage('assets/images/feedback.png')),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Feedback',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
+                      const Spacer(),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Colors.grey,
                       ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Colors.grey,
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               ],
             ),

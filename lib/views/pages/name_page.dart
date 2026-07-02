@@ -43,7 +43,7 @@ class _NamePageState extends ConsumerState<NamePage> {
     final userState = ref.watch(userProvider);
 
     return Scaffold(
-      backgroundColor: MyColors.primaryDark,
+      backgroundColor: MyColors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -61,9 +61,9 @@ class _NamePageState extends ConsumerState<NamePage> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
-                      color: Colors.white,
+                      color: MyColors.ink,
                       fontSize: 48,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 20.0),
@@ -73,7 +73,7 @@ class _NamePageState extends ConsumerState<NamePage> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
-                      color: Colors.white,
+                      color: MyColors.ink,
                       fontSize: 24,
                     ),
                   ),
@@ -84,7 +84,7 @@ class _NamePageState extends ConsumerState<NamePage> {
                     onSubmitted: (_) => _continue(),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: MyColors.surface,
                       hintText: userState.value?.name ?? 'Your name',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(32.0),
@@ -105,7 +105,7 @@ class _NamePageState extends ConsumerState<NamePage> {
                   child: TextButton(
                     onPressed: userState.isLoading ? null : _continue,
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: MyColors.primary,
                       padding: const EdgeInsets.all(16.0),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(32.0)),
@@ -113,7 +113,11 @@ class _NamePageState extends ConsumerState<NamePage> {
                     ),
                     child: const Text(
                       'Continue',
-                      style: TextStyle(color: Colors.black, fontSize: 18.0),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),

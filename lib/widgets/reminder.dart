@@ -31,7 +31,7 @@ class _ReminderWidgetState extends State<ReminderWidget> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: MyColors.primary,
+          color: MyColors.darkPanel,
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -177,13 +177,14 @@ class _ReminderWidgetState extends State<ReminderWidget> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: MyColors.primaryDark, // Set border color
-              width: 1.0, // Set border width
+              color: Colors.white.withValues(alpha: 0.18),
+              width: 1.0,
             ),
           ),
           child: CircleAvatar(
-            foregroundColor: selected ? MyColors.primaryDark : Colors.white,
-            backgroundColor: selected ? MyColors.primary : MyColors.primaryDark,
+            foregroundColor: selected ? MyColors.ink : Colors.white,
+            backgroundColor:
+                selected ? Colors.white : Colors.white.withValues(alpha: 0.12),
             child: Text(day),
           ),
         ));

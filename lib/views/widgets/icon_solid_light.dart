@@ -20,7 +20,7 @@ class IconSolidLight extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: Icon(
               icon,
-              color: MyColors.primaryDark,
+              color: MyColors.ink,
             ),
           ),
         ),

@@ -49,6 +49,7 @@ class QuotesController extends StateNotifier<AsyncValue<List<Quote>?>> {
 
   Future<void> createQuote(Quote quote) async {
     await quotesRepository.createQuote(quote);
+    await getQuotesByMe();
   }
 
   Future<void> getQuotesByMe() async {

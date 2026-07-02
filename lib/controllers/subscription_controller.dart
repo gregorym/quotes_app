@@ -50,6 +50,59 @@ class SubscriptionController extends ChangeNotifier {
     }
   }
 
+  Future<bool> buyPremium() async {
+    try {
+      final bool available = await InAppPurchase.instance.isAvailable();
+      if (!available) {
+        _isReady = false;
+        notifyListeners();
+        return false;
+      }
+
+      final response =
+          await InAppPurchase.instance.queryProductDetails({'premium'});
+      if (response.productDetails.isEmpty) {
+        _isReady = false;
+        notifyListeners();
+        return false;
+      }
+
+      _isReady = true;
+      notifyListeners();
+      final purchaseParam =
+          PurchaseParam(productDetails: response.productDetails.first);
+      return await InAppPurchase.instance.buyNonConsumable(
+        purchaseParam: purchaseParam,
+      );
+    } catch (e) {
+      debugPrint(ErrorHandling.getErrorMessage(e));
+      _isReady = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> restorePurchases() async {
+    try {
+      final bool available = await InAppPurchase.instance.isAvailable();
+      if (!available) {
+        _isReady = false;
+        notifyListeners();
+        return false;
+      }
+
+      await InAppPurchase.instance.restorePurchases();
+      _isReady = true;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint(ErrorHandling.getErrorMessage(e));
+      _isReady = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void checkSubscription() async {
     try {
       final bool available = await InAppPurchase.instance.isAvailable();

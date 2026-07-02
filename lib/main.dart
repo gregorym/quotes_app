@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quotes_app/views/menu.dart';
 import 'package:quotes_app/views/pages/name_page.dart';
+import 'package:quotes_app/views/templates/onboarding_template.dart';
 import 'package:quotes_app/views/templates/subscription_page_template.dart';
 import 'package:quotes_app/views/templates/splash_page_template.dart';
 import 'package:quotes_app/views/templates/welcome_reminder_template.dart';
@@ -33,6 +34,10 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(path: '/', builder: (context, state) => const SplashPage()),
       GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingTemplate(),
+      ),
+      GoRoute(
           path: '/welcome', builder: (context, state) => const WelcomePage()),
       GoRoute(path: '/name', builder: (context, state) => const NamePage()),
       GoRoute(
@@ -55,7 +60,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'No Excuses',
-          themeMode: ThemeMode.dark,
+          themeMode: ThemeMode.light,
           darkTheme: MyTheme.darkTheme,
           theme: MyTheme.darkTheme,
           routerConfig: _router,

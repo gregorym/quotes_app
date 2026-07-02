@@ -31,6 +31,7 @@ final List<String> myGoogleFonts = [
   "Montserrat",
   // "Mukta",
   "Nunito",
+  "Nunito Sans",
   // "Offside",
   "Open Sans",
   "Oswald",

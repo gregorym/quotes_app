@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../controllers/user_controller.dart';
 import '../../models/user_model.dart';
+import '../../repositories/onboarding_repository.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -16,17 +17,20 @@ class SplashPage extends ConsumerStatefulWidget {
 class _SplashPageState extends ConsumerState<SplashPage> {
   bool _started = false;
 
-  void _startSplash(User user) {
+  Future<void> _startSplash(User user) async {
     if (_started) return;
     _started = true;
 
     final now = tz.TZDateTime.now(tz.local);
     final createdAt = user.createdAt ?? now;
-    final showWelcome = now.difference(createdAt).inSeconds < 10;
+    final completedOnboarding =
+        await ref.read(onboardingRepositoryProvider).hasCompleted();
+    final showOnboarding =
+        !completedOnboarding && now.difference(createdAt).inSeconds < 10;
 
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
-      context.go(showWelcome ? '/welcome' : '/quotes');
+      context.go(showOnboarding ? '/onboarding' : '/quotes');
     });
   }
 

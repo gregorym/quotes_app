@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../controllers/subscription_controller.dart';
+import '../themes/colors.dart';
+import '../themes/typography.dart';
+import '../widgets/snackbar.dart';
 
 class SubscriptionPage extends ConsumerWidget {
   const SubscriptionPage({super.key});
@@ -13,7 +16,7 @@ class SubscriptionPage extends ConsumerWidget {
     subscriptionState.checkSubscription();
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: MyColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -22,45 +25,48 @@ class SubscriptionPage extends ConsumerWidget {
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  color: Colors.white,
+                  color: MyColors.muted,
                   icon: const Icon(Icons.close),
                   onPressed: () =>
                       context.canPop() ? context.pop() : context.go('/quotes'),
                 ),
               ),
-              const Column(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50),
+                  const SizedBox(height: 58),
                   Text(
-                    "Try Motivation Premium",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "Start your 7-day free trial",
+                    textAlign: TextAlign.center,
+                    style: MyTypography.h2,
                   ),
-                  Center(
-                    child: Text(
-                      "⚡️",
-                      style: TextStyle(fontSize: 50),
-                    ),
-                  ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Text(
-                    "Unlock everything",
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    "✓  Unique offer applied",
+                    style: MyTypography.body1.copyWith(
+                      color: MyColors.primary,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 50),
-                  FeatureItem("Enjoy your first 3 days, it's free"),
-                  FeatureItem("Cancel anytime"),
-                  FeatureItem("Quotes to remind you to keep pushing"),
-                  FeatureItem("Streaks to track your progress"),
-                  FeatureItem("Only \$1.66/month, billed annually"),
+                  const SizedBox(height: 38),
+                  const FeatureItem(
+                    icon: Icons.lock,
+                    color: MyColors.primary,
+                    title: "Today",
+                    text: "Get full access and see how it changes your life.",
+                  ),
+                  const FeatureItem(
+                    icon: Icons.notifications,
+                    color: MyColors.primary,
+                    title: "Day 5",
+                    text: "You receive a reminder before your trial ends.",
+                  ),
+                  const FeatureItem(
+                    icon: Icons.workspace_premium,
+                    color: MyColors.teal,
+                    title: "Day 7",
+                    text: "Only \$19.99/year after trial. Cancel anytime.",
+                  ),
                 ],
               ),
               Positioned(
@@ -72,7 +78,11 @@ class SubscriptionPage extends ConsumerWidget {
                     const Center(
                       child: Text(
                         "3 days free, then just \$19.99/year",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: MyColors.ink,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -80,9 +90,21 @@ class SubscriptionPage extends ConsumerWidget {
                       width: double.infinity,
                       height: 60.0,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final didStartPurchase =
+                              await subscriptionState.buyPremium();
+                          if (!context.mounted) return;
+                          showSnackbar(
+                            context,
+                            didStartPurchase
+                                ? 'Purchase started.'
+                                : 'Premium product is not available yet.',
+                            isError: !didStartPurchase,
+                          );
+                        },
                         style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
+                          backgroundColor: MyColors.primary,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.all(16.0),
                           shape: const RoundedRectangleBorder(
                             borderRadius:
@@ -92,8 +114,9 @@ class SubscriptionPage extends ConsumerWidget {
                         child: const Text(
                           'Continue',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 18.0,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
@@ -102,16 +125,32 @@ class SubscriptionPage extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            final didRestore =
+                                await subscriptionState.restorePurchases();
+                            if (!context.mounted) return;
+                            showSnackbar(
+                              context,
+                              didRestore
+                                  ? 'Restore requested.'
+                                  : 'Restore is not available yet.',
+                              isError: !didRestore,
+                            );
+                          },
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
+                            foregroundColor: MyColors.muted,
                           ),
                           child: const Text("Restore"),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            showSnackbar(
+                              context,
+                              'Terms and privacy URLs need to be configured.',
+                            );
+                          },
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
+                            foregroundColor: MyColors.muted,
                           ),
                           child: const Text("Terms & Conditions"),
                         ),
@@ -129,22 +168,43 @@ class SubscriptionPage extends ConsumerWidget {
 }
 
 class FeatureItem extends StatelessWidget {
-  const FeatureItem(this.text, {super.key});
+  const FeatureItem({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.text,
+  });
 
+  final IconData icon;
+  final Color color;
+  final String title;
   final String text;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const EdgeInsets.symmetric(vertical: 14.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check, color: Colors.white, size: 24),
-          const SizedBox(width: 10),
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: color.withValues(alpha: 0.72),
+            child: Icon(icon, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 18),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: MyTypography.body1.copyWith(
+                      fontWeight: FontWeight.w900,
+                    )),
+                const SizedBox(height: 5),
+                Text(text, style: MyTypography.body2),
+              ],
             ),
           ),
         ],

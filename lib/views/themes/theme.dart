@@ -23,26 +23,33 @@ class MyTheme {
   // Light Theme
   static final lightTheme = ThemeData(
     colorSchemeSeed: _swatch(MyColors.primary),
+    useMaterial3: true,
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: MyColors.background,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: MyColors.background,
+      elevation: 0,
+      foregroundColor: MyColors.ink,
+      surfaceTintColor: Colors.transparent,
+    ),
   );
 
   // Dark Theme
   static final darkTheme = ThemeData(
+    useMaterial3: true,
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorSchemeSeed: _swatch(MyColors.secondary),
-    scaffoldBackgroundColor: MyColors.primaryDark,
-    appBarTheme: AppBarTheme(
-      backgroundColor: MyColors.primaryDark,
+    colorSchemeSeed: _swatch(MyColors.primary),
+    scaffoldBackgroundColor: MyColors.background,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: MyColors.background,
       elevation: 0,
-      iconTheme: IconThemeData(
-        color: MyColors.primary,
-      ),
+      foregroundColor: MyColors.ink,
+      surfaceTintColor: Colors.transparent,
     ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: MyColors.primaryDark,
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: MyColors.surface,
       selectedItemColor: MyColors.primary,
-      unselectedItemColor: MyColors.secondary,
+      unselectedItemColor: MyColors.muted,
     ),
   );
 }

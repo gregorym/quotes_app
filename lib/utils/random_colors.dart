@@ -8,5 +8,5 @@ Color getRandomColor() {
 
   final colorsCode = MyColors.quoteCardColors;
 
-  return Color(colorsCode[random.nextInt(11)]);
+  return Color(colorsCode[random.nextInt(colorsCode.length)]);
 }

@@ -1,5 +1,3 @@
-
-
 class Quote {
   final String? id;
   final String content;
@@ -12,17 +10,19 @@ class Quote {
   });
 
   factory Quote.fromJson(Map<String, dynamic> json) {
-    final id = json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();  
+    final id = json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
 
     return Quote(
       id: id,
       content: json['content'],
-      categories: (json['categories'] as List? ?? []).map((e) => e.toString()).toList(),
+      categories:
+          (json['categories'] as List? ?? []).map((e) => e.toString()).toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'content': content,
       'categories': categories,
     };

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/quote_model.dart';
+import '../themes/colors.dart';
 
 class QuotWidgetShare extends StatelessWidget {
   const QuotWidgetShare({
@@ -23,8 +24,8 @@ class QuotWidgetShare extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(36),
+        color: MyColors.darkPanel,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(
         children: [
@@ -45,7 +46,7 @@ class QuotWidgetShare extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Icon(Icons.format_quote, size: 70, color: Colors.white),
+                const Icon(Icons.format_quote, size: 70, color: MyColors.teal),
                 const SizedBox(height: 20),
                 Expanded(
                   child: AutoSizeText(

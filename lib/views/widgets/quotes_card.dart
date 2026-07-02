@@ -7,11 +7,12 @@ import 'package:quotes_app/models/quotable_model.dart';
 
 import '../../controllers/quotes_controller.dart';
 import '../themes/colors.dart';
+import '../themes/typography.dart';
 
 class QuotesCard extends ConsumerWidget {
   const QuotesCard({super.key});
 
-  static const double _cardHeight = 400;
+  static const double _cardHeight = 360;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,12 +45,7 @@ class QuotesCard extends ConsumerWidget {
       children: [
         Text(
           "Daily Quotes",
-          style: GoogleFonts.getFont(
-            "Nunito Sans",
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: MyTypography.h3,
         ),
         const SizedBox(height: 12),
         BannerCarousel(
@@ -77,8 +73,8 @@ class QuoteCard extends StatelessWidget {
       height: QuotesCard._cardHeight,
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: MyColors.primary,
+        borderRadius: BorderRadius.circular(8),
+        color: MyColors.surface,
       ),
       child: Stack(
         children: [
@@ -88,7 +84,7 @@ class QuoteCard extends StatelessWidget {
             child: Icon(
               Icons.format_quote,
               size: 220,
-              color: MyColors.primaryDark.withValues(alpha: 0.3),
+              color: MyColors.selected.withValues(alpha: 0.70),
             ),
           ),
           Padding(
@@ -106,14 +102,14 @@ class QuoteCard extends StatelessWidget {
                     quote.content ?? 'Keep going.',
                     textAlign: TextAlign.start,
                     maxLines: 8,
-                    maxFontSize: 42,
-                    minFontSize: 24,
+                    maxFontSize: 34,
+                    minFontSize: 20,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
-                      fontSize: 42,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 34,
+                      color: MyColors.ink,
+                      fontWeight: FontWeight.w900,
                       height: 1.12,
                     ),
                   ),
@@ -124,9 +120,9 @@ class QuoteCard extends StatelessWidget {
                     quote.author!,
                     style: GoogleFonts.getFont(
                       "Nunito Sans",
-                      color: Colors.white70,
+                      color: MyColors.muted,
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],
@@ -152,8 +148,8 @@ class _QuoteMessage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: MyColors.primary,
+        borderRadius: BorderRadius.circular(8),
+        color: MyColors.surface,
       ),
       child: Center(
         child: Column(
@@ -162,7 +158,7 @@ class _QuoteMessage extends StatelessWidget {
             Icon(
               Icons.format_quote,
               size: 56,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: MyColors.teal,
             ),
             const SizedBox(height: 20),
             Text(
@@ -170,9 +166,9 @@ class _QuoteMessage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.getFont(
                 "Nunito Sans",
-                color: Colors.white,
+                color: MyColors.ink,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 8),
@@ -181,7 +177,7 @@ class _QuoteMessage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.getFont(
                 "Nunito Sans",
-                color: Colors.white70,
+                color: MyColors.muted,
                 fontSize: 14,
               ),
             ),

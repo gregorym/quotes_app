@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:quotes_app/views/themes/colors.dart';
 
 void showSnackbar(BuildContext context, String message, {bool isError = true}) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      backgroundColor: isError ? Colors.red : const Color(0xff68B984),
+      backgroundColor: isError ? MyColors.pink : MyColors.primary,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(20),
       behavior: SnackBarBehavior.floating,

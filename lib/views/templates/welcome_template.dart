@@ -13,7 +13,7 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MyColors.primaryDark,
+      backgroundColor: MyColors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -31,7 +31,7 @@ class WelcomePage extends StatelessWidget {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                   child: Container(
-                    color: MyColors.primaryDark.withValues(alpha: 0.8),
+                    color: MyColors.background.withValues(alpha: 0.88),
                   ),
                 ),
               ),
@@ -55,7 +55,7 @@ class WelcomePage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.getFont(
                         "Nunito Sans",
-                        color: Colors.white,
+                        color: MyColors.ink,
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
                         height: 1.3,
@@ -69,7 +69,7 @@ class WelcomePage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.getFont(
                         "Nunito Sans",
-                        color: Colors.white,
+                        color: MyColors.ink,
                         fontSize: 24,
                         height: 1.3,
                       ),
@@ -93,7 +93,7 @@ class WelcomePage extends StatelessWidget {
                       context.push('/name');
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: MyColors.primary,
                       padding: const EdgeInsets.all(16.0),
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(32.0)),
@@ -101,7 +101,11 @@ class WelcomePage extends StatelessWidget {
                     ),
                     child: const Text(
                       'Get Started',
-                      style: TextStyle(color: Colors.black, fontSize: 18.0),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),

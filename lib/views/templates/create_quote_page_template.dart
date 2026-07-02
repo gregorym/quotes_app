@@ -4,11 +4,14 @@ import 'package:flutter_font_picker/flutter_font_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:group_button/group_button.dart';
 
+import '../../controllers/quotes_controller.dart';
+import '../../models/quote_model.dart';
 import '../../utils/font_family.dart';
 import '../themes/colors.dart';
 import '../themes/typography.dart';
 import '../widgets/color_picker.dart';
 import '../widgets/icon_solid_light.dart';
+import '../widgets/snackbar.dart';
 
 class CreateQuotePage extends ConsumerStatefulWidget {
   const CreateQuotePage({super.key, this.showBackButton = true});
@@ -21,12 +24,12 @@ class CreateQuotePage extends ConsumerStatefulWidget {
 }
 
 class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
-  Color backgroundColor = MyColors.primary;
+  Color backgroundColor = MyColors.darkPanel;
   Color textColor = Colors.white;
   double fontSize = 20;
   TextAlign textAlign = TextAlign.center;
   FontWeight fontWeight = FontWeight.normal;
-  PickerFont? selectedFont = PickerFont(fontFamily: 'Poppins');
+  PickerFont? selectedFont = PickerFont(fontFamily: 'Nunito Sans');
 
   final fontSizeType = ['S', 'M', 'L', 'XL'];
   final textAlignType = ['L', 'C', 'R'];
@@ -41,11 +44,20 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
   var professionController = TextEditingController();
 
   @override
+  void dispose() {
+    contentController.dispose();
+    authorController.dispose();
+    professionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MyColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: MyColors.background,
         automaticallyImplyLeading: widget.showBackButton,
         leadingWidth: widget.showBackButton ? 76 : 0,
         toolbarHeight: 66,
@@ -58,26 +70,24 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
         actions: [
           UnconstrainedBox(
             child: TextButton(
-              onPressed: () {
-                if (contentController.text.isNotEmpty) {
-                  // TODO: create quote
+              onPressed: () async {
+                final content = contentController.text.trim();
+                if (content.isNotEmpty) {
+                  await ref.read(quotesProvider.notifier).createQuote(
+                        Quote(content: content),
+                      );
+                  if (!context.mounted) return;
+                  showSnackbar(context, 'Quote saved.', isError: false);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.red,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      behavior: SnackBarBehavior.floating,
-                      content: const Text("Quote cannot be empty!"),
-                    ),
-                  );
+                  showSnackbar(context, 'Quote cannot be empty!');
                 }
               },
               child: Text(
                 "DONE",
-                style: MyTypography.body1.copyWith(fontWeight: FontWeight.w600),
+                style: MyTypography.body1.copyWith(
+                  color: MyColors.ink,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ),
@@ -104,8 +114,8 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                     decoration: BoxDecoration(
                       color: backgroundColor,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(25),
-                        topRight: Radius.circular(25),
+                        topLeft: Radius.circular(8),
+                        topRight: Radius.circular(8),
                       ),
                     ),
                     child: Center(
@@ -150,7 +160,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 30.0),
                     decoration: DottedDecoration(
-                      color: Colors.white,
+                      color: Colors.white.withValues(alpha: 0.60),
                       strokeWidth: 2,
                       dash: const [5, 10],
                       shape: Shape.circle,
@@ -167,8 +177,8 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                     decoration: BoxDecoration(
                       color: backgroundColor,
                       borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(25),
-                        bottomRight: Radius.circular(25),
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
                       ),
                     ),
                     child: Row(
@@ -225,7 +235,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
                   "Note: If you dont fill Author name and Profession, we will use your name and profession.",
-                  style: MyTypography.caption1.copyWith(color: MyColors.black),
+                  style: MyTypography.caption1,
                 ),
               ),
               const SizedBox(height: 30),
@@ -254,8 +264,9 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         width: 100,
                         height: 45,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: selected ? MyColors.secondary : Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          color:
+                              selected ? MyColors.selected : MyColors.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -268,7 +279,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                       );
                     },
                     options: GroupButtonOptions(
-                      selectedColor: MyColors.primary,
+                      selectedColor: MyColors.selected,
                     ),
                     onSelected: (value, index, isSelected) {
                       setState(() {
@@ -316,14 +327,15 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         width: 50,
                         height: 45,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: selected ? MyColors.secondary : Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          color:
+                              selected ? MyColors.selected : MyColors.surface,
                         ),
                         child: Center(child: Icon(icon)),
                       );
                     },
                     options: GroupButtonOptions(
-                      selectedColor: MyColors.primary,
+                      selectedColor: MyColors.selected,
                     ),
                     onSelected: (value, index, isSelected) {
                       setState(() {
@@ -381,8 +393,9 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         width: 50,
                         height: 45,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: selected ? MyColors.secondary : Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          color:
+                              selected ? MyColors.selected : MyColors.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -396,7 +409,7 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                       );
                     },
                     options: GroupButtonOptions(
-                      selectedColor: MyColors.primary,
+                      selectedColor: MyColors.selected,
                     ),
                     onSelected: (value, index, isSelected) {
                       setState(() {
@@ -465,8 +478,8 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: MyColors.disabled),
+                        borderRadius: BorderRadius.circular(28),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
