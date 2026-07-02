@@ -64,7 +64,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       backgroundColor: _feedBackgrounds[_backgroundIndex],
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(36, 28, 36, 28),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
           child: Column(
             children: [
               Row(
@@ -100,17 +100,17 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                     onPressed: () => _copyQuote(context, quoteText),
                     icon: const Icon(Icons.ios_share),
                     color: MyColors.ink,
-                    iconSize: 44,
+                    iconSize: 34,
                   ),
                   const SizedBox(width: 72),
                   IconButton(
                     onPressed: () =>
                         _toggleFavorite(context, quote, quoteText, isFavorite),
                     icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      isFavorite ? Icons.star : Icons.star_border,
                     ),
-                    color: isFavorite ? MyColors.pink : MyColors.ink,
-                    iconSize: 48,
+                    color: isFavorite ? MyColors.orange : MyColors.ink,
+                    iconSize: 36,
                   ),
                 ],
               ),
@@ -268,7 +268,7 @@ class _FeedProgressPill extends StatelessWidget {
                   ),
                 ),
                 child: const Center(
-                  child: Icon(Icons.favorite, size: 17, color: MyColors.ink),
+                  child: Icon(Icons.star, size: 17, color: MyColors.ink),
                 ),
               ),
             ),
@@ -312,13 +312,13 @@ class _CircleButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 58,
-        height: 58,
+        width: 48,
+        height: 48,
         decoration: const BoxDecoration(
           color: MyColors.surface,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: MyColors.ink, size: 32),
+        child: Icon(icon, color: MyColors.ink, size: 26),
       ),
     );
   }
