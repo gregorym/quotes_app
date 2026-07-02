@@ -58,7 +58,6 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
         favorites.map((quote) => quote.id ?? quote.content).toSet();
     final quoteId = _quoteId(quote, quoteText);
     final isFavorite = favoriteIds.contains(quoteId);
-    final likedCount = favorites.length > 5 ? 5 : favorites.length;
 
     return Scaffold(
       backgroundColor: _feedBackgrounds[_backgroundIndex],
@@ -67,18 +66,12 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
           child: Column(
             children: [
-              Row(
-                children: [
-                  _FeedProgressPill(
-                    likedCount: likedCount,
-                    onTap: () => _showStreakSheet(context),
-                  ),
-                  const Spacer(),
-                  _CircleButton(
-                    icon: Icons.lock_outline,
-                    onTap: () => context.push('/subscription'),
-                  ),
-                ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: _CircleButton(
+                  icon: Icons.lock_outline,
+                  onTap: () => context.push('/subscription'),
+                ),
               ),
               const Spacer(flex: 7),
               GestureDetector(
@@ -212,16 +205,6 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
     );
   }
 
-  void _showStreakSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.22),
-      isScrollControlled: true,
-      builder: (context) => const _StreakSheet(),
-    );
-  }
-
   void _showProfileSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -229,74 +212,6 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       barrierColor: Colors.black.withValues(alpha: 0.22),
       isScrollControlled: true,
       builder: (context) => const _ProfileSheet(),
-    );
-  }
-}
-
-class _FeedProgressPill extends StatelessWidget {
-  const _FeedProgressPill({
-    required this.likedCount,
-    required this.onTap,
-  });
-
-  final int likedCount;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 54,
-        padding: const EdgeInsets.fromLTRB(7, 6, 16, 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFFBFE2F1),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 21,
-              backgroundColor: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFF9DC4D6),
-                    width: 3,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(Icons.star, size: 17, color: MyColors.ink),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Improve your feed',
-                  style: MyTypography.body2.copyWith(
-                    color: MyColors.muted,
-                    height: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Like 5 punchlines · $likedCount/5',
-                  style: MyTypography.body1.copyWith(
-                    fontWeight: FontWeight.w900,
-                    height: 1.0,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -320,134 +235,6 @@ class _CircleButton extends StatelessWidget {
         ),
         child: Icon(icon, color: MyColors.ink, size: 26),
       ),
-    );
-  }
-}
-
-class _StreakSheet extends ConsumerWidget {
-  const _StreakSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final streaks = ref.watch(streakProvider).maybeWhen(
-          data: (streaks) => streaks,
-          orElse: () => const <Streak>[],
-        );
-    final checkedWeekdays = _checkedWeekdays(streaks);
-
-    return FractionallySizedBox(
-      heightFactor: 0.42,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: MyColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(34, 18, 34, 24),
-            child: Column(
-              children: [
-                Container(
-                  width: 54,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: MyColors.disabled,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  _streakCount(streaks).toString(),
-                  style: MyTypography.h1.copyWith(
-                    color: MyColors.orange,
-                    fontSize: 64,
-                  ),
-                ),
-                Text(
-                  'DAY STREAK',
-                  style: MyTypography.body1.copyWith(
-                    color: MyColors.muted,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 3,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                _WeekProgress(checkedWeekdays: checkedWeekdays),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 58,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (!_hasToday(streaks)) {
-                        await ref
-                            .read(streakControllerProvider.notifier)
-                            .addStreak(
-                              Streak(
-                                score: 1,
-                                createdAt: tz.TZDateTime.now(tz.local),
-                              ),
-                            );
-                      }
-                      ref.invalidate(streakProvider);
-                      if (context.mounted) Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: MyColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(34),
-                      ),
-                    ),
-                    child: Text(
-                      'Keep going',
-                      style: MyTypography.h3.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WeekProgress extends StatelessWidget {
-  const _WeekProgress({required this.checkedWeekdays});
-
-  final Set<int> checkedWeekdays;
-
-  @override
-  Widget build(BuildContext context) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(days.length, (index) {
-        final isChecked = checkedWeekdays.contains(index);
-
-        return Column(
-          children: [
-            Text(
-              days[index],
-              style: MyTypography.body2.copyWith(color: MyColors.muted),
-            ),
-            const SizedBox(height: 10),
-            CircleAvatar(
-              radius: 17,
-              backgroundColor:
-                  isChecked ? const Color(0xFF63A867) : const Color(0xFFE2E0DC),
-              child: isChecked
-                  ? const Icon(Icons.check, color: Colors.white, size: 26)
-                  : null,
-            ),
-          ],
-        );
-      }),
     );
   }
 }
@@ -954,11 +741,6 @@ Set<int> _checkedWeekdays(List<Streak> streaks) {
           streak.createdAt.isBefore(weekEnd))
       .map((streak) => streak.createdAt.weekday - 1)
       .toSet();
-}
-
-bool _hasToday(List<Streak> streaks) {
-  final today = _dateKey(_streakNow());
-  return streaks.any((streak) => _dateKey(streak.createdAt) == today);
 }
 
 DateTime _dateOnly(DateTime date) {
