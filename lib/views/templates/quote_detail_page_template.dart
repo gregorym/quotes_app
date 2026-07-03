@@ -1,10 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/quote_model.dart';
 import '../../repositories/favorite_repository.dart';
+import '../../utils/quote_share.dart';
 import '../themes/colors.dart';
 import '../themes/typography.dart';
 import '../widgets/icon_solid_light.dart';
@@ -133,9 +133,19 @@ class QuoteDetailPage extends ConsumerWidget {
                 // share button with icon
                 ElevatedButton.icon(
                   onPressed: () async {
-                    await Clipboard.setData(ClipboardData(text: content));
-                    if (!context.mounted) return;
-                    showSnackbar(context, 'Quote copied.', isError: false);
+                    try {
+                      await shareQuoteImage(
+                        context,
+                        Quote(id: content, content: content),
+                      );
+                    } catch (error) {
+                      if (!context.mounted) return;
+                      showSnackbar(
+                        context,
+                        error.toString(),
+                        isError: true,
+                      );
+                    }
                   },
                   icon: const Icon(Icons.share),
                   label: const Text("Share"),

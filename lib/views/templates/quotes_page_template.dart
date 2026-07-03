@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -11,6 +10,7 @@ import '../../models/quotable_model.dart';
 import '../../models/quote_model.dart';
 import '../../models/streak_model.dart';
 import '../../repositories/favorite_repository.dart';
+import '../../utils/quote_share.dart';
 import '../../widgets/reminder.dart';
 import '../themes/colors.dart';
 import '../themes/typography.dart';
@@ -94,7 +94,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () => _copyQuote(context, quoteText),
+                    onPressed: () => _shareQuote(context, quote, quoteText),
                     icon: const Icon(Icons.ios_share),
                     color: MyColors.ink,
                     iconSize: 34,
@@ -179,10 +179,17 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
     });
   }
 
-  Future<void> _copyQuote(BuildContext context, String quoteText) async {
-    await Clipboard.setData(ClipboardData(text: quoteText));
-    if (!context.mounted) return;
-    showSnackbar(context, 'Punchline copied.', isError: false);
+  Future<void> _shareQuote(
+    BuildContext context,
+    Quotable? quote,
+    String quoteText,
+  ) async {
+    try {
+      await shareQuoteImage(context, _favoriteQuoteFrom(quote, quoteText));
+    } catch (error) {
+      if (!context.mounted) return;
+      showSnackbar(context, error.toString(), isError: true);
+    }
   }
 
   Future<void> _toggleFavorite(
