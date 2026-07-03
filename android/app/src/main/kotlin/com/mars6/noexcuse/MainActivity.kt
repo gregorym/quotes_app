@@ -1,4 +1,4 @@
-package com.sahibul_nf.quotes_app
+package com.mars6.noexcuse
 
 import io.flutter.embedding.android.FlutterActivity
 
