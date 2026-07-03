@@ -14,7 +14,6 @@ Future<void> shareQuoteImage(BuildContext context, Quote quote) async {
       quote: quote,
       height: 512,
       width: 512,
-      showBackgroundPattern: true,
     ),
     context: context,
     targetSize: const Size(512, 512),
