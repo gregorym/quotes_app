@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -17,25 +15,6 @@ class WelcomePage extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Opacity(
-              opacity: 1,
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                      "assets/images/welcome_background.webp",
-                    ), // Add your image to the assets folder and reference it here
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                  child: Container(
-                    color: MyColors.background.withValues(alpha: 0.88),
-                  ),
-                ),
-              ),
-            ),
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 12.0,

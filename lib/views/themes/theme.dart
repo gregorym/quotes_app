@@ -2,27 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:quotes_app/views/themes/colors.dart';
 
 class MyTheme {
-  static MaterialColor _swatch(Color color) {
-    return MaterialColor(
-      color.toARGB32(),
-      <int, Color>{
-        50: color.withValues(alpha: 0.1),
-        100: color.withValues(alpha: 0.2),
-        200: color.withValues(alpha: 0.3),
-        300: color.withValues(alpha: 0.4),
-        400: color.withValues(alpha: 0.5),
-        500: color.withValues(alpha: 0.6),
-        600: color.withValues(alpha: 0.7),
-        700: color.withValues(alpha: 0.8),
-        800: color.withValues(alpha: 0.9),
-        900: color,
-      },
-    );
-  }
+  static final _scheme = ColorScheme.fromSeed(
+    seedColor: MyColors.primary,
+    brightness: Brightness.dark,
+    surface: MyColors.surface,
+  );
 
   // Light Theme
   static final lightTheme = ThemeData(
-    colorSchemeSeed: _swatch(MyColors.primary),
+    colorScheme: _scheme,
     useMaterial3: true,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     scaffoldBackgroundColor: MyColors.background,
@@ -32,13 +20,16 @@ class MyTheme {
       foregroundColor: MyColors.ink,
       surfaceTintColor: Colors.transparent,
     ),
+    iconTheme: const IconThemeData(color: MyColors.ink),
+    canvasColor: MyColors.darkPanel,
+    cardColor: MyColors.surface,
   );
 
   // Dark Theme
   static final darkTheme = ThemeData(
     useMaterial3: true,
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorSchemeSeed: _swatch(MyColors.primary),
+    colorScheme: _scheme,
     scaffoldBackgroundColor: MyColors.background,
     appBarTheme: const AppBarTheme(
       backgroundColor: MyColors.background,
@@ -46,6 +37,9 @@ class MyTheme {
       foregroundColor: MyColors.ink,
       surfaceTintColor: Colors.transparent,
     ),
+    iconTheme: const IconThemeData(color: MyColors.ink),
+    canvasColor: MyColors.darkPanel,
+    cardColor: MyColors.surface,
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: MyColors.surface,
       selectedItemColor: MyColors.primary,

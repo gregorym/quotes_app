@@ -64,11 +64,7 @@ class MyProfile extends StatelessWidget {
                       context,
                       'Profile editing needs account storage.',
                     ),
-                    child: const Image(
-                      height: 32,
-                      width: 32,
-                      image: AssetImage('assets/images/pencil.png'),
-                    ),
+                    child: const Icon(Icons.edit, color: MyColors.teal),
                   ),
                 ],
               ),
@@ -155,7 +151,7 @@ class MyProfile extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Image(image: AssetImage('assets/images/sabit.png')),
+                    const Icon(Icons.dark_mode, color: MyColors.teal),
                     const SizedBox(width: 16),
                     Text(
                       'Night mode',
@@ -198,7 +194,7 @@ class MyProfile extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const Image(image: AssetImage('assets/images/ask.png')),
+                      const Icon(Icons.help_outline, color: MyColors.teal),
                       const SizedBox(width: 16),
                       Text(
                         'Help & Support',
@@ -221,8 +217,7 @@ class MyProfile extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const Image(
-                          image: AssetImage('assets/images/feedback.png')),
+                      const Icon(Icons.feedback_outlined, color: MyColors.teal),
                       const SizedBox(width: 16),
                       Text(
                         'Feedback',

@@ -182,7 +182,7 @@ class _ReminderWidgetState extends State<ReminderWidget> {
             ),
           ),
           child: CircleAvatar(
-            foregroundColor: selected ? MyColors.ink : Colors.white,
+            foregroundColor: selected ? MyColors.darkPanel : Colors.white,
             backgroundColor:
                 selected ? Colors.white : Colors.white.withValues(alpha: 0.12),
             child: Text(day),

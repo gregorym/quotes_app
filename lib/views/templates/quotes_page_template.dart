@@ -28,9 +28,9 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       "You don't need more time. You need more balls.";
   static const _feedBackgrounds = [
     MyColors.background,
-    Color(0xFFE8F0EC),
-    Color(0xFFEAF0F7),
-    Color(0xFFF4E9E9),
+    Color(0x331C1308),
+    Color(0x332E240D),
+    Color(0x22E0A32D),
   ];
 
   int _quoteIndex = 0;
@@ -268,7 +268,7 @@ class _ProfileSheet extends ConsumerWidget {
       heightFactor: 0.96,
       child: DecoratedBox(
         decoration: const BoxDecoration(
-          color: MyColors.background,
+          color: MyColors.darkPanel,
           borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
         ),
         child: SafeArea(
@@ -314,7 +314,7 @@ class _ProfileSheet extends ConsumerWidget {
                         children: [
                           const Icon(
                             Icons.ac_unit,
-                            color: Color(0xFF9EDDF3),
+                            color: MyColors.teal,
                             size: 18,
                           ),
                           const SizedBox(width: 8),
@@ -554,7 +554,7 @@ class _ProfileSection extends StatelessWidget {
                     height: 1,
                     indent: 20,
                     endIndent: 20,
-                    color: Color(0xFFE8E6E1),
+                    color: MyColors.disabled,
                   ),
               ],
             ],
@@ -610,7 +610,7 @@ class _FavoritesSheet extends ConsumerWidget {
         : (favorites.length > 4 ? 330.0 : favorites.length * 82.0);
 
     return FractionallySizedBox(
-      heightFactor: favorites.isEmpty ? 0.3 : 0.52,
+      heightFactor: favorites.isEmpty ? 0.34 : 0.52,
       child: DecoratedBox(
         decoration: const BoxDecoration(
           color: MyColors.surface,
@@ -650,7 +650,7 @@ class _FavoritesSheet extends ConsumerWidget {
                       : ListView.separated(
                           itemCount: favorites.length,
                           separatorBuilder: (_, __) => const Divider(
-                            color: Color(0xFFE8E6E1),
+                            color: MyColors.disabled,
                           ),
                           itemBuilder: (context, index) {
                             final quote = favorites[index];

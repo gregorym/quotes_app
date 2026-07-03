@@ -13,6 +13,7 @@ import 'package:quotes_app/views/templates/splash_page_template.dart';
 import 'package:quotes_app/views/templates/welcome_reminder_template.dart';
 import 'package:quotes_app/views/templates/welcome_template.dart';
 import 'package:quotes_app/views/themes/theme.dart';
+import 'package:quotes_app/views/widgets/app_background.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
@@ -57,13 +58,15 @@ class MyApp extends StatelessWidget {
       enabled: kIsWeb,
       maximumSize: const Size(390, 844),
       builder: (context) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'No Excuses',
-          themeMode: ThemeMode.light,
-          darkTheme: MyTheme.darkTheme,
-          theme: MyTheme.darkTheme,
-          routerConfig: _router,
+        return AppBackground(
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'No Excuses',
+            themeMode: ThemeMode.light,
+            darkTheme: MyTheme.darkTheme,
+            theme: MyTheme.darkTheme,
+            routerConfig: _router,
+          ),
         );
       },
     );

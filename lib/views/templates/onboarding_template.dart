@@ -7,16 +7,17 @@ import 'package:quotes_app/controllers/user_controller.dart';
 import 'package:quotes_app/repositories/onboarding_repository.dart';
 
 const _appName = 'No Excuses';
-const _bg = Color(0xFFEDEBE6);
-const _ink = Color(0xFF303033);
-const _muted = Color(0xFF8F8F8F);
-const _green = Color(0xFF79BE7A);
-const _teal = Color(0xFF78B6C2);
-const _orange = Color(0xFFDFA174);
-const _pink = Color(0xFFE86E7B);
-const _disabled = Color(0xFFC9C6C1);
-const _darkPanel = Color(0xFF303030);
-const _selectedPill = Color(0xFFE1E8DC);
+const _bg = Color(0x00000000);
+const _surface = Color(0xE016120C);
+const _ink = Color(0xFFFFFFFF);
+const _muted = Color(0xFFC9BCA2);
+const _green = Color(0xFF8F641D);
+const _teal = Color(0xFFDFC16A);
+const _orange = Color(0xFFE0A32D);
+const _pink = Color(0xFFE07A7A);
+const _disabled = Color(0xFF5D5549);
+const _darkPanel = Color(0xF20A0704);
+const _selectedPill = Color(0xFF332512);
 const _ctaWidth = 300.0;
 const _ctaHeight = 58.0;
 const _pillWidth = 262.0;
@@ -234,8 +235,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
           const SizedBox(height: 10),
           Text('Your new mental hygiene.', style: _bodyStyle(22)),
           const Spacer(flex: 12),
-          Image.asset('assets/images/onboarding/hero_sunglasses.png',
-              width: 170),
+          _heroIcon(Icons.sentiment_satisfied_alt, size: 88),
           const Spacer(flex: 20),
           _primaryButton('Change my world', color: _green, onTap: _next),
           const SizedBox(height: 24),
@@ -282,7 +282,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       child: Column(
         children: [
           const SizedBox(height: 44),
-          Image.asset('assets/images/onboarding/hero_notebook.png', width: 96),
+          _heroIcon(Icons.menu_book, size: 54),
           const SizedBox(height: 12),
           Text(
             'How did you hear about\n$_appName?',
@@ -315,7 +315,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       child: Column(
         children: [
           const SizedBox(height: 68),
-          Image.asset('assets/images/onboarding/hero_ghost.png', width: 122),
+          _heroIcon(Icons.person_outline, size: 60),
           const SizedBox(height: 18),
           Text("What's your name?", style: _titleStyle(32)),
           const SizedBox(height: 94),
@@ -329,7 +329,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
               style: _titleStyle(30),
               decoration: InputDecoration(
                 hintText: 'Enter your first name',
-                hintStyle: _bodyStyle(24).copyWith(color: Colors.black26),
+                hintStyle: _bodyStyle(24).copyWith(color: Colors.white38),
                 border: const UnderlineInputBorder(
                   borderSide: BorderSide(color: _ink, width: 2),
                 ),
@@ -457,7 +457,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       child: Column(
         children: [
           const SizedBox(height: 44),
-          Image.asset('assets/images/onboarding/hero_strong.png', width: 158),
+          _heroIcon(Icons.fitness_center, size: 68),
           const SizedBox(height: 12),
           Text(
             'Get strength delivered during\nthe day',
@@ -509,9 +509,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
             onSkip: _next,
           ),
           SizedBox(height: topGap),
-          if (!showSkip)
-            Image.asset('assets/images/onboarding/hero_notebook.png',
-                width: 96),
+          if (!showSkip) _heroIcon(Icons.menu_book, size: 54),
           if (!showSkip) const SizedBox(height: 4),
           Text(title, textAlign: TextAlign.center, style: _titleStyle(29)),
           const SizedBox(height: 15),
@@ -544,7 +542,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       child: Column(
         children: [
           const SizedBox(height: 125),
-          Image.asset('assets/images/onboarding/hero_strong.png', width: 190),
+          _heroIcon(Icons.local_fire_department, size: 76),
           const SizedBox(height: 54),
           Text(
             'Build a real daily habit',
@@ -593,7 +591,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
             onSkip: _next,
           ),
           const SizedBox(height: 30),
-          Image.asset('assets/images/onboarding/hero_notebook.png', width: 88),
+          _heroIcon(Icons.interests, size: 52),
           const SizedBox(height: 8),
           Text(
             'Which categories interest you?',
@@ -623,7 +621,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
                   },
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: checked ? _selectedPill : Colors.white,
+                      color: checked ? _selectedPill : _surface,
                       borderRadius: BorderRadius.circular(28),
                     ),
                     child: Padding(
@@ -665,7 +663,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       child: Column(
         children: [
           const SizedBox(height: 260),
-          Image.asset('assets/images/onboarding/hero_loading.png', width: 220),
+          _heroIcon(Icons.auto_awesome, size: 86),
           const SizedBox(height: 68),
           Text(
             'Gathering your answers...',
@@ -686,10 +684,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
             left: 0,
             right: 0,
             top: 70,
-            child: Image.asset(
-              'assets/images/onboarding/bunting.png',
-              fit: BoxFit.fitWidth,
-            ),
+            child: Center(child: _heroIcon(Icons.workspace_premium, size: 72)),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 238, 28, 0),
@@ -718,7 +713,7 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
                 ),
                 const _Benefit(
                   icon: Icons.phone_iphone,
-                  color: _ink,
+                  color: _orange,
                   text: 'A widget on your lock screen',
                 ),
                 const _Benefit(
@@ -755,6 +750,19 @@ class _OnboardingTemplateState extends ConsumerState<OnboardingTemplate> {
       ),
     );
   }
+}
+
+Widget _heroIcon(IconData icon, {required double size}) {
+  return Container(
+    width: size * 1.75,
+    height: size * 1.75,
+    decoration: BoxDecoration(
+      color: _surface,
+      shape: BoxShape.circle,
+      border: Border.all(color: _teal.withValues(alpha: 0.42), width: 1.5),
+    ),
+    child: Icon(icon, color: _teal, size: size),
+  );
 }
 
 class _Screen extends StatelessWidget {
@@ -811,7 +819,7 @@ class _TopBar extends StatelessWidget {
                 height: 8,
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Colors.white,
+                  backgroundColor: _surface,
                   valueColor: const AlwaysStoppedAnimation<Color>(_green),
                 ),
               ),
@@ -882,7 +890,7 @@ class _TrialSheet extends StatelessWidget {
       heightFactor: 0.94,
       child: DecoratedBox(
         decoration: const BoxDecoration(
-          color: _bg,
+          color: _darkPanel,
           borderRadius: BorderRadius.vertical(top: Radius.circular(38)),
         ),
         child: SafeArea(
@@ -952,7 +960,7 @@ class _TrialSheet extends StatelessWidget {
     return Center(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _surface,
           borderRadius: BorderRadius.circular(32),
         ),
         child: Padding(
@@ -1012,7 +1020,7 @@ class _Timeline extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [_green, _green, _teal, Color(0x00EDEBE6)],
+                      colors: [_green, _green, _teal, Color(0x00000000)],
                     ),
                   ),
                 ),
@@ -1112,7 +1120,7 @@ Widget _optionPill(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? _selectedPill : Colors.white,
+          color: selected ? _selectedPill : _surface,
           borderRadius: BorderRadius.circular(28),
         ),
         child: Text(
@@ -1128,7 +1136,7 @@ Widget _optionPill(
 Widget _notificationPreview() {
   return DecoratedBox(
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: _surface,
       borderRadius: BorderRadius.circular(18),
       boxShadow: [
         BoxShadow(
@@ -1146,7 +1154,7 @@ Widget _notificationPreview() {
           const SizedBox(width: 16),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: _bg,
+              color: _selectedPill,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const SizedBox(
@@ -1241,7 +1249,7 @@ Widget _stepperText(String text) {
     width: 104,
     height: 34,
     decoration: BoxDecoration(
-      color: _bg,
+      color: _selectedPill,
       borderRadius: BorderRadius.circular(4),
     ),
     child: Row(
@@ -1276,7 +1284,7 @@ Widget _streakCard() {
             const SizedBox(height: 10),
             CircleAvatar(
               radius: 15,
-              backgroundColor: index == 0 ? _green : Colors.white,
+              backgroundColor: index == 0 ? _green : _surface,
               child: index == 0
                   ? const Icon(Icons.check, color: Colors.white, size: 24)
                   : null,

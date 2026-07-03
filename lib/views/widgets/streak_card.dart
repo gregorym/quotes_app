@@ -207,7 +207,7 @@ class StreakCard extends ConsumerWidget {
       onPressed: onPressed,
       style: TextButton.styleFrom(
         backgroundColor: Colors.white,
-        foregroundColor: MyColors.ink,
+        foregroundColor: MyColors.darkPanel,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),

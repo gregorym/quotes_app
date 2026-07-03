@@ -488,7 +488,9 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
                           selectedFont != null
                               ? Text(
                                   selectedFont!.fontFamily,
-                                  style: selectedFont!.toTextStyle(),
+                                  style: selectedFont!
+                                      .toTextStyle()
+                                      .copyWith(color: MyColors.ink),
                                 )
                               : Text("Select font", style: MyTypography.body2),
                           const Icon(Icons.keyboard_arrow_down, size: 16),
