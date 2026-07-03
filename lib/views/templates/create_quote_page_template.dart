@@ -29,7 +29,8 @@ class _CreateQuotePageState extends ConsumerState<CreateQuotePage> {
   double fontSize = 20;
   TextAlign textAlign = TextAlign.center;
   FontWeight fontWeight = FontWeight.normal;
-  PickerFont? selectedFont = PickerFont(fontFamily: 'Nunito Sans');
+  PickerFont? selectedFont =
+      PickerFont(fontFamily: MyTypography.quoteFontFamily);
 
   final fontSizeType = ['S', 'M', 'L', 'XL'];
   final textAlignType = ['L', 'C', 'R'];

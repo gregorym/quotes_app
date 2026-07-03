@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quotes_app/views/themes/colors.dart';
 
 class MyTypography {
+  static const quoteFontFamily = 'Roboto Slab';
+
   // * Headings
   static TextStyle h1 = GoogleFonts.getFont(
     'Nunito Sans',
@@ -38,6 +40,14 @@ class MyTypography {
     'Nunito Sans',
     fontSize: 14,
     fontWeight: FontWeight.w500,
+    color: MyColors.black,
+    height: 1.25,
+  );
+
+  static TextStyle quote = GoogleFonts.getFont(
+    quoteFontFamily,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
     color: MyColors.black,
     height: 1.25,
   );

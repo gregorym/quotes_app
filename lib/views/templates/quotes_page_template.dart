@@ -82,7 +82,11 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                   maxLines: 4,
                   maxFontSize: 32,
                   minFontSize: 24,
-                  style: MyTypography.h1.copyWith(fontSize: 32),
+                  style: MyTypography.quote.copyWith(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    height: 1.12,
+                  ),
                 ),
               ),
               const Spacer(flex: 5),
@@ -649,7 +653,7 @@ class _FavoritesSheet extends ConsumerWidget {
                                 quote.content,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: MyTypography.body1,
+                                style: MyTypography.quote,
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline),

@@ -1,9 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/quote_model.dart';
 import '../themes/colors.dart';
+import '../themes/typography.dart';
 
 class QuotWidgetShare extends StatelessWidget {
   const QuotWidgetShare({
@@ -54,8 +54,7 @@ class QuotWidgetShare extends StatelessWidget {
                     maxFontSize: 28,
                     minFontSize: 18,
                     maxLines: 10,
-                    style: GoogleFonts.getFont(
-                      "Nunito Sans",
+                    style: MyTypography.quote.copyWith(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.w600,

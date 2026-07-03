@@ -70,7 +70,7 @@ class QuoteDetailPage extends ConsumerWidget {
                 minFontSize: 18,
                 maxLines: 10,
                 textAlign: TextAlign.center,
-                style: MyTypography.body1.copyWith(
+                style: MyTypography.quote.copyWith(
                   color: MyColors.ink,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,

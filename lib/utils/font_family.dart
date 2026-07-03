@@ -42,6 +42,7 @@ final List<String> myGoogleFonts = [
   "Raleway",
   "Roboto",
   "Roboto Mono",
+  "Roboto Slab",
   "Source Sans Pro",
   // "Space Mono",
   // "Spicy Rice",

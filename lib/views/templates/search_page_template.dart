@@ -140,7 +140,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             quote.content ?? '',
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: MyTypography.body1,
+            style: MyTypography.quote,
           ),
           subtitle: Text(
             quote.author ?? 'Unknown',

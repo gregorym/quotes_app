@@ -105,8 +105,7 @@ class QuoteCard extends StatelessWidget {
                     maxFontSize: 34,
                     minFontSize: 20,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.getFont(
-                      "Nunito Sans",
+                    style: MyTypography.quote.copyWith(
                       fontSize: 34,
                       color: MyColors.ink,
                       fontWeight: FontWeight.w900,
