@@ -28,14 +28,14 @@ class QuotWidgetShare extends StatelessWidget {
             child: AutoSizeText(
               quote.content,
               textAlign: TextAlign.center,
-              maxFontSize: 34,
+              maxFontSize: 36,
               minFontSize: 18,
               maxLines: 9,
               style: MyTypography.quote.copyWith(
                 color: Colors.white,
-                fontSize: 34,
+                fontSize: 36,
                 fontWeight: FontWeight.w800,
-                height: 1.2,
+                height: 1.3,
               ),
             ),
           ),

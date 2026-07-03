@@ -46,10 +46,10 @@ class MyTypography {
 
   static TextStyle quote = GoogleFonts.getFont(
     quoteFontFamily,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     color: MyColors.black,
-    height: 1.25,
+    height: 1.35,
   );
 
   // * Caption

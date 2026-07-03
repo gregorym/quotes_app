@@ -66,15 +66,15 @@ class QuoteDetailPage extends ConsumerWidget {
             Expanded(
               child: AutoSizeText(
                 content,
-                maxFontSize: 28,
+                maxFontSize: 30,
                 minFontSize: 18,
                 maxLines: 10,
                 textAlign: TextAlign.center,
                 style: MyTypography.quote.copyWith(
                   color: MyColors.ink,
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.w600,
-                  height: 1.3,
+                  height: 1.4,
                 ),
               ),
             ),
