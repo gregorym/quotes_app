@@ -34,7 +34,7 @@ void main() {
     });
   });
 
-  testWidgets('share image uses app background and centers the quote', (
+  testWidgets('share image centers the quote and brands the bottom right', (
     tester,
   ) async {
     const squareKey = Key('share-square');
@@ -62,8 +62,12 @@ void main() {
 
     final squareCenter = tester.getCenter(find.byKey(squareKey));
     final quoteCenter = tester.getCenter(find.byType(AutoSizeText));
+    final squareBottomRight = tester.getBottomRight(find.byKey(squareKey));
+    final brandBottomRight = tester.getBottomRight(find.text('No Excuses'));
 
     expect((quoteCenter.dx - squareCenter.dx).abs(), lessThan(1));
     expect((quoteCenter.dy - squareCenter.dy).abs(), lessThan(1));
+    expect(squareBottomRight.dx - brandBottomRight.dx, 24);
+    expect(squareBottomRight.dy - brandBottomRight.dy, 20);
   });
 }

@@ -14,6 +14,7 @@ import '../../models/quotable_model.dart';
 import '../../models/quote_model.dart';
 import '../../repositories/favorite_repository.dart';
 import '../../repositories/onboarding_repository.dart';
+import '../../repositories/top_tasks_repository.dart';
 import '../../utils/quote_share.dart';
 import '../../utils/external_links.dart';
 import '../../widgets/reminder.dart';
@@ -33,7 +34,13 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
   static const _fallbackQuote =
       "You don't need more time. You need more balls.";
   late final PageController _quotePageController;
+  final _topTasksRepository = TopTasksRepository();
   int _quoteIndex = 0;
+  bool _showTopTasks = false;
+  bool _tasksLoaded = false;
+  bool _tasksLoading = false;
+  bool _tasksSaving = false;
+  List<TopTask> _topTasks = const [];
 
   @override
   void initState() {
@@ -85,6 +92,8 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
         favorites.map((quote) => quote.id ?? quote.content).toSet();
     final quoteId = _quoteId(quote, quoteText);
     final isFavorite = favoriteIds.contains(quoteId);
+    final motionDisabled = MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -97,11 +106,13 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                 child: SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 14, 8, 24),
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 24),
                     child: Column(
                       children: [
                         Expanded(
                           child: Container(
+                            key: const Key('home-quote-card'),
+                            clipBehavior: Clip.antiAlias,
                             padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
                             decoration: BoxDecoration(
                               color: const Color(0xFF17181B),
@@ -137,6 +148,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                                         child: GestureDetector(
                                           onTap: () => _showQuoteDialog(
                                             context,
+                                            pageQuote,
                                             pageQuoteText,
                                           ),
                                           child: Column(
@@ -153,6 +165,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                                                         onTap: () =>
                                                             _showQuoteDialog(
                                                           context,
+                                                          pageQuote,
                                                           pageQuoteText,
                                                         ),
                                                       )
@@ -166,40 +179,42 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                                     },
                                   ),
                                 ),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: _quoteActions(
+                                    context,
+                                    quote,
+                                    quoteText,
+                                    isFavorite,
+                                    compact: true,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              tooltip: 'Share quote',
-                              onPressed: () =>
-                                  _shareQuote(context, quote, quoteText),
-                              icon: const Icon(Icons.ios_share),
-                              color: Colors.white,
-                              iconSize: 34,
-                            ),
-                            const SizedBox(width: 72),
-                            IconButton(
-                              tooltip: isFavorite
-                                  ? 'Remove from favorites'
-                                  : 'Add to favorites',
-                              onPressed: () => _toggleFavorite(
-                                  context, quote, quoteText, isFavorite),
-                              icon: Icon(
-                                isFavorite
-                                    ? Icons.bookmark
-                                    : Icons.bookmark_border,
-                              ),
-                              color:
-                                  isFavorite ? MyColors.orange : Colors.white,
-                              iconSize: 36,
-                            ),
-                          ],
+                        AnimatedSize(
+                          duration: motionDisabled
+                              ? Duration.zero
+                              : const Duration(milliseconds: 360),
+                          curve: Curves.easeInOutCubic,
+                          alignment: Alignment.bottomCenter,
+                          child: _showTopTasks
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: _TopThreeCard(
+                                    tasks: _topTasks,
+                                    loading: _tasksLoading,
+                                    saving: _tasksSaving,
+                                    onSave: _saveTaskEdit,
+                                    onDelete: _deleteTask,
+                                    onToggle: _toggleTask,
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
+                        const SizedBox(height: 8),
+                        _topTasksAction(),
                       ],
                     ),
                   ),
@@ -237,6 +252,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
 
   void _showQuoteDialog(
     BuildContext context,
+    Quotable? quote,
     String quoteText,
   ) {
     showGeneralDialog<void>(
@@ -276,6 +292,25 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                             ),
                           ),
                         ),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final isFavorite =
+                                ref.watch(favoriteQuotesProvider).maybeWhen(
+                                      data: (favorites) => favorites.any(
+                                        (favorite) =>
+                                            (favorite.id ?? favorite.content) ==
+                                            _quoteId(quote, quoteText),
+                                      ),
+                                      orElse: () => false,
+                                    );
+                            return _quoteActions(
+                              context,
+                              quote,
+                              quoteText,
+                              isFavorite,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -290,6 +325,135 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
         child: child,
       ),
     );
+  }
+
+  Widget _quoteActions(
+    BuildContext context,
+    Quotable? quote,
+    String quoteText,
+    bool isFavorite, {
+    bool compact = false,
+  }) {
+    return Row(
+      mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          tooltip: 'Share quote',
+          onPressed: () => _shareQuote(context, quote, quoteText),
+          icon: const Icon(Icons.ios_share),
+          color: Colors.white,
+          iconSize: compact ? 24 : 34,
+        ),
+        SizedBox(width: compact ? 4 : 44),
+        IconButton(
+          tooltip: isFavorite ? 'Remove from bookmarks' : 'Add to bookmarks',
+          onPressed: () =>
+              _toggleFavorite(context, quote, quoteText, isFavorite),
+          icon: Icon(
+            isFavorite ? Icons.bookmark : Icons.bookmark_border,
+          ),
+          color: isFavorite ? MyColors.orange : Colors.white,
+          iconSize: compact ? 26 : 36,
+        ),
+      ],
+    );
+  }
+
+  Widget _topTasksAction() => IconButton(
+        tooltip: _showTopTasks ? 'Hide top three' : 'Show top three',
+        onPressed: _toggleTopTasks,
+        icon: Icon(
+          _showTopTasks
+              ? Icons.checklist_rounded
+              : Icons.playlist_add_check_rounded,
+        ),
+        color: _showTopTasks ? MyColors.orange : Colors.white,
+        iconSize: 36,
+      );
+
+  void _toggleTopTasks() {
+    HapticFeedback.selectionClick();
+    setState(() => _showTopTasks = !_showTopTasks);
+    if (_showTopTasks && !_tasksLoaded && !_tasksLoading) {
+      unawaited(_loadTopTasks());
+    }
+  }
+
+  Future<void> _loadTopTasks() async {
+    setState(() => _tasksLoading = true);
+    try {
+      final tasks = await _topTasksRepository.fetchToday();
+      if (!mounted) return;
+      setState(() {
+        _topTasks = tasks;
+        _tasksLoaded = true;
+      });
+    } catch (_) {
+      if (mounted) {
+        showSnackbar(context, 'Could not load your top three.', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _tasksLoading = false);
+    }
+  }
+
+  Future<bool> _saveTaskEdit(TopTask? task, String text) async {
+    final trimmed = text.trim();
+    if (_tasksSaving || trimmed.isEmpty || !mounted) return false;
+
+    final updated = task == null
+        ? [
+            ..._topTasks,
+            TopTask(
+              id: DateTime.now().microsecondsSinceEpoch.toString(),
+              text: trimmed,
+            ),
+          ]
+        : _topTasks
+            .map((item) =>
+                item.id == task.id ? item.copyWith(text: trimmed) : item)
+            .toList();
+    return _saveTasks(updated);
+  }
+
+  Future<void> _toggleTask(TopTask task) async {
+    await _saveTasks(
+      _topTasks
+          .map((item) => item.id == task.id
+              ? item.copyWith(completed: !item.completed)
+              : item)
+          .toList(),
+    );
+  }
+
+  Future<void> _deleteTask(TopTask task) async {
+    await _saveTasks(
+      _topTasks.where((item) => item.id != task.id).toList(),
+    );
+  }
+
+  Future<bool> _saveTasks(List<TopTask> tasks) async {
+    if (_tasksSaving) return false;
+    final previous = _topTasks;
+    final ordered = orderTopTasks(tasks);
+    var saved = false;
+    setState(() {
+      _topTasks = ordered;
+      _tasksSaving = true;
+    });
+    try {
+      await _topTasksRepository.saveToday(ordered);
+      saved = true;
+    } catch (_) {
+      if (mounted) {
+        setState(() => _topTasks = previous);
+        showSnackbar(context, 'Could not save your top three.', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _tasksSaving = false);
+    }
+    return saved;
   }
 
   Future<void> _shareQuote(
@@ -324,7 +488,7 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
     if (!context.mounted) return;
     showSnackbar(
       context,
-      isFavorite ? 'Removed from favorites.' : 'Added to favorites.',
+      isFavorite ? 'Removed from bookmarks.' : 'Added to bookmarks.',
       isError: false,
     );
   }
@@ -338,6 +502,301 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       builder: (context) => const _ProfileSheet(),
     );
   }
+}
+
+class _TopThreeCard extends StatefulWidget {
+  const _TopThreeCard({
+    required this.tasks,
+    required this.loading,
+    required this.saving,
+    required this.onSave,
+    required this.onDelete,
+    required this.onToggle,
+  });
+
+  final List<TopTask> tasks;
+  final bool loading;
+  final bool saving;
+  final Future<bool> Function(TopTask?, String) onSave;
+  final ValueChanged<TopTask> onDelete;
+  final ValueChanged<TopTask> onToggle;
+
+  @override
+  State<_TopThreeCard> createState() => _TopThreeCardState();
+}
+
+class _TopThreeCardState extends State<_TopThreeCard> {
+  final _controller = TextEditingController();
+  TopTask? _editingTask;
+  bool _adding = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _edit([TopTask? task]) {
+    final text = task?.text ?? '';
+    _controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    setState(() {
+      _editingTask = task;
+      _adding = task == null;
+    });
+  }
+
+  void _cancelEdit() => setState(() {
+        _editingTask = null;
+        _adding = false;
+      });
+
+  Future<void> _saveEdit() async {
+    if (_controller.text.trim().isEmpty) return;
+    final task = _editingTask;
+    final adding = _adding;
+    final text = _controller.text;
+    _cancelEdit();
+    if (!await widget.onSave(task, text) && mounted) {
+      setState(() {
+        _editingTask = task;
+        _adding = adding;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final motionDisabled = MediaQuery.disableAnimationsOf(context) ||
+        MediaQuery.accessibleNavigationOf(context);
+
+    return Container(
+      key: const Key('top-three-card'),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 14, 12, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF17181B),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Text(
+                "TODAY'S TOP 3",
+                style: MyTypography.body2.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${widget.tasks.length}/3',
+                style: MyTypography.caption1.copyWith(color: Colors.white54),
+              ),
+            ],
+          ),
+          if (widget.loading)
+            const Padding(
+              padding: EdgeInsets.all(18),
+              child: SizedBox.square(
+                dimension: 22,
+                child: CircularProgressIndicator(
+                  color: MyColors.orange,
+                  strokeWidth: 2,
+                ),
+              ),
+            )
+          else ...[
+            if (widget.tasks.isEmpty && !_adding)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 12, 6, 2),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Pick the few things that make today count.',
+                    style: MyTypography.body2.copyWith(color: Colors.white54),
+                  ),
+                ),
+              ),
+            AnimatedSwitcher(
+              duration: motionDisabled
+                  ? Duration.zero
+                  : const Duration(milliseconds: 220),
+              layoutBuilder: (currentChild, _) =>
+                  currentChild ?? const SizedBox.shrink(),
+              child: Column(
+                key: ValueKey([
+                  ...widget.tasks.map((task) => '${task.id}:${task.completed}'),
+                  _adding ? 'new' : _editingTask?.id ?? '',
+                ].join('|')),
+                children: [
+                  for (final task in widget.tasks)
+                    if (_editingTask?.id == task.id)
+                      _editorRow()
+                    else
+                      _TopTaskRow(
+                        task: task,
+                        enabled: !widget.saving,
+                        onEdit: () => _edit(task),
+                        onDelete: () => widget.onDelete(task),
+                        onToggle: () => widget.onToggle(task),
+                      ),
+                  if (_adding) _editorRow(),
+                ],
+              ),
+            ),
+            if (!_adding && _editingTask == null && widget.tasks.length < 3)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: widget.saving ? null : _edit,
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: Text(widget.tasks.isEmpty
+                      ? 'ADD YOUR FIRST TASK'
+                      : 'ADD TASK'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: MyColors.orange,
+                    padding: const EdgeInsets.only(right: 8),
+                    textStyle: MyTypography.caption1.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.7,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _editorRow() => SizedBox(
+        key: const Key('inline-task-editor'),
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                autofocus: true,
+                enabled: !widget.saving,
+                maxLength: 80,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _saveEdit(),
+                style: MyTypography.body1.copyWith(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'What matters most today?',
+                  counterText: '',
+                  isDense: true,
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.06),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide:
+                        const BorderSide(color: MyColors.orange, width: 1.5),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Save task',
+              onPressed: widget.saving ? null : _saveEdit,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.check_rounded, size: 21),
+              color: MyColors.orange,
+            ),
+            IconButton(
+              tooltip: 'Cancel task edit',
+              onPressed: widget.saving ? null : _cancelEdit,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.close_rounded, size: 19),
+              color: Colors.white54,
+            ),
+          ],
+        ),
+      );
+}
+
+class _TopTaskRow extends StatelessWidget {
+  const _TopTaskRow({
+    required this.task,
+    required this.enabled,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onToggle,
+  });
+
+  final TopTask task;
+  final bool enabled;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 43,
+        child: Row(
+          children: [
+            Semantics(
+              label: task.text,
+              child: Checkbox(
+                value: task.completed,
+                onChanged: enabled ? (_) => onToggle() : null,
+                activeColor: MyColors.orange,
+                checkColor: Colors.white,
+                shape: const CircleBorder(),
+                side: const BorderSide(color: Colors.white54, width: 1.5),
+              ),
+            ),
+            Expanded(
+              child: InkWell(
+                onTap: enabled ? onEdit : null,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: AnimatedDefaultTextStyle(
+                    duration: MediaQuery.disableAnimationsOf(context) ||
+                            MediaQuery.accessibleNavigationOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
+                    style: MyTypography.body1.copyWith(
+                      color: task.completed ? Colors.white38 : Colors.white,
+                      decoration: task.completed
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      decorationColor: Colors.white54,
+                    ),
+                    child: Text(
+                      task.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Delete ${task.text}',
+              onPressed: enabled ? onDelete : null,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.close_rounded, size: 19),
+              color: Colors.white38,
+            ),
+          ],
+        ),
+      );
 }
 
 class _QuoteText extends StatelessWidget {
@@ -543,10 +1002,9 @@ class _ProfileSheet extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _ProfileSection(
-                  title: 'Punchlines',
                   rows: [
                     _ProfileAction(
-                      label: 'Favorites (${favorites.length})',
+                      label: 'Bookmarks (${favorites.length})',
                       onTap: () => _showFavoritesSheet(context, favorites),
                     ),
                   ],
@@ -585,9 +1043,9 @@ class _ProfileAction {
 }
 
 class _ProfileSection extends StatelessWidget {
-  const _ProfileSection({required this.title, required this.rows});
+  const _ProfileSection({this.title, required this.rows});
 
-  final String title;
+  final String? title;
   final List<_ProfileAction> rows;
 
   @override
@@ -595,17 +1053,18 @@ class _ProfileSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 18, bottom: 14),
-          child: Text(
-            title,
-            style: MyTypography.body1.copyWith(
-              color: MyColors.muted,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 3,
+        if (title != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 18, bottom: 14),
+            child: Text(
+              title!,
+              style: MyTypography.body1.copyWith(
+                color: MyColors.muted,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 3,
+              ),
             ),
           ),
-        ),
         Container(
           decoration: BoxDecoration(
             color: MyColors.surface,
@@ -705,14 +1164,14 @@ class _FavoritesSheet extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text('Favorites', style: MyTypography.h2),
+                Text('Bookmarks', style: MyTypography.h2),
                 const SizedBox(height: 18),
                 SizedBox(
                   height: listHeight,
                   child: favorites.isEmpty
                       ? Center(
                           child: Text(
-                            'No favorites yet.',
+                            'No bookmarks yet.',
                             style: MyTypography.body1.copyWith(
                               color: MyColors.muted,
                             ),
@@ -744,7 +1203,7 @@ class _FavoritesSheet extends ConsumerWidget {
                                   Navigator.pop(context);
                                   showSnackbar(
                                     context,
-                                    'Removed from favorites.',
+                                    'Removed from bookmarks.',
                                     isError: false,
                                   );
                                 },
@@ -840,7 +1299,7 @@ void _showTermsAndPrivacy(BuildContext context) {
       ),
       SizedBox(height: 18),
       Text(
-        'Your onboarding answers, reminder schedule, and favorites are stored on this device. Apple processes purchases. No Excuses does not sell your personal information.',
+        'Your onboarding answers, reminder schedule, and bookmarks are stored on this device. Apple processes purchases. No Excuses does not sell your personal information.',
         style: MyTypography.body1,
       ),
       const SizedBox(height: 18),

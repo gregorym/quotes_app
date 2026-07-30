@@ -124,7 +124,7 @@ class QuoteDetailPage extends ConsumerWidget {
                     if (!context.mounted) return;
                     showSnackbar(
                       context,
-                      'Added to favorites.',
+                      'Added to bookmarks.',
                       isError: false,
                     );
                   },

@@ -73,6 +73,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('quote-dialog')), findsOneWidget);
     expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('quote-dialog')),
+        matching: find.byTooltip('Share quote'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('quote-dialog')),
+        matching: find.byTooltip('Add to bookmarks'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
