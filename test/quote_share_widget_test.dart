@@ -1,11 +1,39 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quotes_app/models/quote_model.dart';
+import 'package:quotes_app/utils/quote_share.dart';
 import 'package:quotes_app/views/widgets/app_background.dart';
 import 'package:quotes_app/views/widgets/quot_widget_share.dart';
 
 void main() {
+  testWidgets('native share receives the quote image and text', (tester) async {
+    const channel = MethodChannel('com.mars6.noexcuse/share');
+    MethodCall? received;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      channel,
+      (call) async {
+        received = call;
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
+
+    await shareNativeQuote('Do the work.', '/tmp/quote.png');
+
+    expect(received?.method, 'share');
+    expect(received?.arguments, {
+      'text': 'Do the work.',
+      'filePath': '/tmp/quote.png',
+    });
+  });
+
   testWidgets('share image uses app background and centers the quote', (
     tester,
   ) async {

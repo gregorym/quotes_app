@@ -1,43 +1,62 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:hive/hive.dart';
-import 'package:quotes_app/models/reminder_model.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../models/streak_model.dart';
 
-final streakProvider = FutureProvider<List<Streak>>((ref) {
-  StreakController controller = StreakController();
-  return controller.fetchStreakList();
-});
+final streakControllerProvider = Provider((ref) => StreakController());
+final streakProvider = FutureProvider<List<Streak>>(
+  (ref) => ref.watch(streakControllerProvider).fetchStreakList(),
+);
 
-// controller provider
-final streakControllerProvider =
-    StateNotifierProvider<StreakController, Reminder?>((ref) {
-  return StreakController();
-});
+int streakDateKey(DateTime date) =>
+    date.year * 10000 + date.month * 100 + date.day;
 
-class StreakController extends StateNotifier<Reminder?> {
-  final String _boxName = 'streakBox';
+int streakChallengeTarget(int count) => count >= 30
+    ? 100
+    : count >= 7
+        ? 30
+        : 7;
 
-  StreakController() : super(null);
-
-  Future<List<Streak>> fetchStreakList() async {
-    var box = await Hive.openBox(_boxName);
-    if (box.length > 0) {
-      List<Streak> streakList = [];
-      for (int i = 0; i < box.length; i++) {
-        var data = box.getAt(i) as Map<dynamic, dynamic>?;
-        Streak s = Streak.fromJson(data!);
-        streakList.add(s);
-      }
-      return streakList;
-    } else {
-      return [];
-    }
+int currentStreakCount(List<Streak> streaks, DateTime now) {
+  final completedDays =
+      streaks.map((streak) => streakDateKey(streak.createdAt)).toSet();
+  var cursor = DateTime(now.year, now.month, now.day);
+  if (!completedDays.contains(streakDateKey(cursor))) {
+    cursor = DateTime(cursor.year, cursor.month, cursor.day - 1);
   }
 
-  Future<void> addStreak(Streak streak) async {
-    var box = await Hive.openBox(_boxName);
-    await box.add(streak.toJson());
+  var count = 0;
+  while (completedDays.contains(streakDateKey(cursor))) {
+    count++;
+    cursor = DateTime(cursor.year, cursor.month, cursor.day - 1);
+  }
+  return count;
+}
+
+class StreakController {
+  static const _boxName = 'streakBox';
+
+  Future<List<Streak>> fetchStreakList() async {
+    final box = await Hive.openBox(_boxName);
+    final streaks = box.values
+        .whereType<Map<dynamic, dynamic>>()
+        .map(Streak.fromJson)
+        .toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    return streaks;
+  }
+
+  Future<bool> completeToday() async {
+    final now = tz.TZDateTime.now(tz.local);
+    final box = await Hive.openBox(_boxName);
+    final alreadyComplete = box.values
+        .whereType<Map<dynamic, dynamic>>()
+        .map(Streak.fromJson)
+        .any((streak) => streakDateKey(streak.createdAt) == streakDateKey(now));
+    if (alreadyComplete) return false;
+
+    await box.add(Streak(score: 1, createdAt: now).toJson());
+    return true;
   }
 }

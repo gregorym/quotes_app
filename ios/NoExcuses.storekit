@@ -1,0 +1,104 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "4D985F55",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "511D895E",
+      "localizations" : [
+
+      ],
+      "name" : "No Excuses Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "99.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "9EBA1661",
+          "introductoryOffer" : {
+            "billingPlanType" : "BILLED_UPFRONT",
+            "internalID" : "3DAYFREE",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "Your personalized accountability system, billed annually.",
+              "displayName" : "No Excuses Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.mars6.noexcuse.premium.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "No Excuses Premium Annual",
+          "subscriptionGroupID" : "511D895E",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6E70C21C",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Your personalized accountability system, billed weekly.",
+              "displayName" : "No Excuses Weekly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.mars6.noexcuse.premium.weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "No Excuses Premium Weekly",
+          "subscriptionGroupID" : "511D895E",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

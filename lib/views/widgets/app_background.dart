@@ -10,17 +10,8 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        image: DecorationImage(
-          image: AssetImage(MyColors.backgroundImage),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: ColoredBox(
-        color: Colors.black26,
-        child: child,
-      ),
+      decoration: const BoxDecoration(color: MyColors.background),
+      child: child,
     );
   }
 }

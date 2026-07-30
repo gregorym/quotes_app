@@ -11,6 +11,7 @@ class MyTheme {
   // Light Theme
   static final lightTheme = ThemeData(
     colorScheme: _scheme,
+    fontFamily: 'Nunito Sans',
     useMaterial3: true,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     scaffoldBackgroundColor: MyColors.background,
@@ -23,27 +24,26 @@ class MyTheme {
     iconTheme: const IconThemeData(color: MyColors.ink),
     canvasColor: MyColors.darkPanel,
     cardColor: MyColors.surface,
+    dividerColor: MyColors.disabled,
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: MyColors.primary,
+        foregroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(58),
+        shape: const StadiumBorder(),
+        textStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: MyColors.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide.none,
+      ),
+    ),
   );
 
   // Dark Theme
-  static final darkTheme = ThemeData(
-    useMaterial3: true,
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    colorScheme: _scheme,
-    scaffoldBackgroundColor: MyColors.background,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: MyColors.background,
-      elevation: 0,
-      foregroundColor: MyColors.ink,
-      surfaceTintColor: Colors.transparent,
-    ),
-    iconTheme: const IconThemeData(color: MyColors.ink),
-    canvasColor: MyColors.darkPanel,
-    cardColor: MyColors.surface,
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: MyColors.surface,
-      selectedItemColor: MyColors.primary,
-      unselectedItemColor: MyColors.muted,
-    ),
-  );
+  static final darkTheme = lightTheme;
 }

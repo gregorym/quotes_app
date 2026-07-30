@@ -1,266 +1,345 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quotes_app/controllers/streak_controller.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../controllers/reminder_controller.dart';
+import '../../controllers/streak_controller.dart';
 import '../../models/streak_model.dart';
-import '../themes/colors.dart';
 import '../themes/typography.dart';
 
-class StreakCard extends ConsumerWidget {
+const _flameAsset = 'assets/images/streak_flame.svg';
+
+class StreakCard extends ConsumerStatefulWidget {
   const StreakCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final streakState = ref.watch(streakProvider);
-    final streakCount = streakState.maybeWhen(
-      data: (streakList) => streakList.length,
-      orElse: () => 0,
+  ConsumerState<StreakCard> createState() => _StreakCardState();
+}
+
+class _StreakCardState extends ConsumerState<StreakCard> {
+  bool _saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    final state = ref.watch(streakProvider);
+    final streaks = state.maybeWhen(
+      data: (streaks) => streaks,
+      orElse: () => const <Streak>[],
     );
+    final now = DateTime.now();
+    final completedDays =
+        streaks.map((streak) => streakDateKey(streak.createdAt)).toSet();
+    final todayComplete = completedDays.contains(streakDateKey(now));
+    final streakCount = currentStreakCount(streaks, now);
 
-    final isStreakCreatedToday = streakState.maybeWhen(
-      data: (streakList) {
-        final now = tz.TZDateTime.now(tz.local);
-        if (now.hour < 17) {
-          return true;
-        }
-
-        if (streakList.isEmpty) {
-          return false;
-        }
-        final lastStreakCreatedAt = streakList.last.createdAt;
-
-        return lastStreakCreatedAt.year == now.year &&
-            lastStreakCreatedAt.month == now.month &&
-            lastStreakCreatedAt.day == now.day;
-      },
-      orElse: () => false,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              "Streak",
-              style: MyTypography.h3,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: MyColors.darkPanel,
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -25,
-                top: 25,
-                child: Icon(
-                  Icons.local_fire_department,
-                  color: MyColors.orange.withValues(alpha: 0.55),
-                  size: 120,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: isStreakCreatedToday
-                          ? [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '$streakCount',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Text(
-                                    'days',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ]
-                          : [],
-                    ),
-                  ),
-                  Expanded(
-                    child: isStreakCreatedToday
-                        ? _listWeekStreak(ref)
-                        : _buildTodayScore(ref),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _listWeekStreak(WidgetRef ref) {
-    final reminderState = ref.watch(reminderProvider);
-    final todayIndex = tz.TZDateTime.now(tz.local).weekday % 7;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(7, (index) => index)
-          .map(
-            (dayIndex) => _buildDayCircle(
-              ['S', 'M', 'T', 'W', 'T', 'F', 'S'][dayIndex],
-              isToday: todayIndex == dayIndex,
-              score: 0,
-              isAfterToday: todayIndex < dayIndex,
-              isSkipped: reminderState.maybeWhen(
-                data: (r) => r != null ? !r.days[dayIndex] : false,
-                orElse: () => false,
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildTodayScore(WidgetRef ref) {
-    final streakController = ref.watch(streakControllerProvider.notifier);
-    final parser = EmojiParser();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 32, bottom: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
+    return SizedBox(
+      height: 301 + topInset,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Text(
-            "How was today?",
-            style: MyTypography.body1.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-            ),
+          _StreakHeader(
+            count: streakCount,
+            topInset: topInset,
           ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _scoreButton(
-                label: parser.emojify('Poor :thumbsdown:'),
-                onPressed: () async {
-                  await streakController.addStreak(
-                    Streak(score: 0, createdAt: tz.TZDateTime.now(tz.local)),
-                  );
-                  ref.invalidate(streakProvider);
-                },
-              ),
-              const SizedBox(width: 12),
-              _scoreButton(
-                label: parser.emojify('Good :thumbsup:'),
-                onPressed: () async {
-                  await streakController.addStreak(
-                    Streak(score: 1, createdAt: tz.TZDateTime.now(tz.local)),
-                  );
-                  ref.invalidate(streakProvider);
-                },
-              ),
-              const SizedBox(width: 12),
-              _scoreButton(
-                label: parser.emojify('Great :fire:'),
-                onPressed: () async {
-                  await streakController.addStreak(
-                    Streak(score: 2, createdAt: tz.TZDateTime.now(tz.local)),
-                  );
-                  ref.invalidate(streakProvider);
-                },
-              ),
-            ],
+          Positioned(
+            left: 8,
+            right: 8,
+            bottom: 0,
+            child: _ChallengePanel(
+              streaks: streaks,
+              now: now,
+              completedDays: completedDays,
+              streakCount: streakCount,
+              todayComplete: todayComplete,
+              loading: state.isLoading || _saving,
+              onComplete: _completeToday,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _scoreButton({
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: MyColors.darkPanel,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+  Future<void> _completeToday() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(streakControllerProvider).completeToday();
+      ref.invalidate(streakProvider);
+      await ref.read(streakProvider.future);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save today. Try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+}
+
+class _StreakHeader extends StatelessWidget {
+  const _StreakHeader({
+    required this.count,
+    required this.topInset,
+  });
+
+  final int count;
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 222 + topInset,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6A00), Color(0xFFF04A22)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(32),
+        ),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -26,
+            top: topInset - 24,
+            child: SvgPicture.asset(
+              _flameAsset,
+              width: 190,
+              height: 190,
+              colorFilter: ColorFilter.mode(
+                Colors.white.withValues(alpha: 0.10),
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: topInset + 42,
+            child: TweenAnimationBuilder<double>(
+              key: ValueKey(count),
+              tween: Tween(begin: 0, end: count.toDouble()),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutBack,
+              builder: (context, value, _) => Text(
+                value.round().toString(),
+                textAlign: TextAlign.center,
+                style: MyTypography.h3.copyWith(
+                  color: Colors.white,
+                  fontSize: 56,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: topInset + 104,
+            left: 0,
+            right: 0,
+            child: Text(
+              count == 1 ? 'DAY STREAK' : 'DAYS STREAK',
+              textAlign: TextAlign.center,
+              style: MyTypography.h3.copyWith(
+                color: Colors.white,
+                fontSize: 22,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildDayCircle(
-    String day, {
-    bool isSkipped = false,
-    bool isAfterToday = false,
-    bool isToday = false,
-    int score = 0,
-  }) {
-    Color foregroundColor = Colors.white;
-    Color backgroundColor = Colors.white.withValues(alpha: 0.12);
+class _ChallengePanel extends StatelessWidget {
+  const _ChallengePanel({
+    required this.streaks,
+    required this.now,
+    required this.completedDays,
+    required this.streakCount,
+    required this.todayComplete,
+    required this.loading,
+    required this.onComplete,
+  });
 
-    if (isToday) {
-      foregroundColor = MyColors.ink;
-      backgroundColor = Colors.white;
-    }
+  static const _labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    if (isAfterToday) {
-      foregroundColor = Colors.white.withValues(alpha: 0.55);
-      backgroundColor = Colors.white.withValues(alpha: 0.10);
-    }
+  final List<Streak> streaks;
+  final DateTime now;
+  final Set<int> completedDays;
+  final int streakCount;
+  final bool todayComplete;
+  final bool loading;
+  final VoidCallback onComplete;
 
-    if (isSkipped && !isToday) {
-      foregroundColor = Colors.white.withValues(alpha: 0.28);
-      backgroundColor = Colors.white.withValues(alpha: 0.06);
-    }
+  @override
+  Widget build(BuildContext context) {
+    final challengeTarget = streakChallengeTarget(streakCount);
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart =
+        DateTime(today.year, today.month, today.day - now.weekday % 7);
+    final firstCompleted = streaks.isEmpty
+        ? null
+        : streaks.map((streak) => streak.createdAt).reduce(
+              (a, b) => a.isBefore(b) ? a : b,
+            );
 
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 1.0,
+    return Container(
+      height: 148,
+      padding: const EdgeInsets.fromLTRB(16, 13, 16, 11),
+      decoration: BoxDecoration(
+        color: const Color(0xFF17181B),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: todayComplete
+            ? MainAxisAlignment.spaceEvenly
+            : MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                '$challengeTarget DAY CHALLENGE',
+                style: MyTypography.body2.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'DAY ${streakCount.clamp(0, challengeTarget)} OF $challengeTarget',
+                style: MyTypography.body2.copyWith(
+                  color: Colors.white54,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(7, (index) {
+              final date = DateTime(
+                  weekStart.year, weekStart.month, weekStart.day + index);
+              final complete = completedDays.contains(streakDateKey(date));
+              final inactive = firstCompleted == null ||
+                  date.isBefore(DateTime(
+                    firstCompleted.year,
+                    firstCompleted.month,
+                    firstCompleted.day,
+                  ));
+              final missed = date.isBefore(today) && !complete && !inactive;
+              return _DayFlame(
+                label: _labels[index],
+                complete: complete,
+                missed: missed,
+                today: streakDateKey(date) == streakDateKey(today),
+              );
+            }),
+          ),
+          if (!todayComplete) ...[
+            const Spacer(),
+            SizedBox(
+              height: 34,
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: loading ? null : onComplete,
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6A00),
+                  disabledBackgroundColor: Colors.white12,
+                  padding: EdgeInsets.zero,
+                ),
+                child: Text(
+                  loading ? 'SAVING...' : 'COMPLETE TODAY',
+                  style: MyTypography.caption1.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DayFlame extends StatelessWidget {
+  const _DayFlame({
+    required this.label,
+    required this.complete,
+    required this.missed,
+    required this.today,
+  });
+
+  final String label;
+  final bool complete;
+  final bool missed;
+  final bool today;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = complete
+        ? const Color(0xFFFF6A00)
+        : missed
+            ? const Color(0xFF58A9FF)
+            : Colors.white30;
+
+    return SizedBox(
+      width: 34,
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: MyTypography.caption1.copyWith(
+              color: today ? color : Colors.white54,
+              fontWeight: FontWeight.w900,
             ),
           ),
-          child: CircleAvatar(
-            maxRadius: 16.0,
-            foregroundColor: foregroundColor,
-            backgroundColor: backgroundColor,
-            child: Text(day),
+          const SizedBox(height: 2),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 420),
+            transitionBuilder: (child, animation) => ScaleTransition(
+              scale:
+                  CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              child: child,
+            ),
+            child: Stack(
+              key: ValueKey('$complete-$missed-$today'),
+              alignment: Alignment.center,
+              children: [
+                SvgPicture.asset(
+                  _flameAsset,
+                  width: 30,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                ),
+                if (complete)
+                  const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 17),
+                if (missed)
+                  const Icon(Icons.close_rounded,
+                      color: Colors.white, size: 14),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

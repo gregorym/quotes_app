@@ -1,60 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quotes_app/views/themes/colors.dart';
 
 class MyTypography {
-  static const quoteFontFamily = 'Roboto Slab';
+  static const displayFontFamily = 'Anton';
+  static const bodyFontFamily = 'Nunito Sans';
+  static const quoteFontFamily = displayFontFamily;
 
   // * Headings
-  static TextStyle h1 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle h1 = TextStyle(
+    fontFamily: displayFontFamily,
     fontSize: 34,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w400,
     color: MyColors.black,
-    height: 1.12,
+    height: 1.05,
+    letterSpacing: -0.6,
   );
-  static TextStyle h2 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle h2 = TextStyle(
+    fontFamily: displayFontFamily,
     fontSize: 28,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w400,
     color: MyColors.black,
-    height: 1.12,
+    height: 1.05,
+    letterSpacing: -0.4,
   );
-  static TextStyle h3 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle h3 = TextStyle(
+    fontFamily: bodyFontFamily,
     fontSize: 22,
     fontWeight: FontWeight.w900,
     color: MyColors.black,
-    height: 1.12,
+    height: 1.1,
   );
 
   // * Body
-  static TextStyle body1 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle body1 = TextStyle(
+    fontFamily: bodyFontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: MyColors.black,
     height: 1.25,
   );
-  static TextStyle body2 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle body2 = TextStyle(
+    fontFamily: bodyFontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w500,
     color: MyColors.black,
     height: 1.25,
   );
 
-  static TextStyle quote = GoogleFonts.getFont(
-    quoteFontFamily,
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
+  static const TextStyle quote = TextStyle(
+    fontFamily: displayFontFamily,
+    fontSize: 24,
+    fontWeight: FontWeight.w400,
     color: MyColors.black,
-    height: 1.35,
+    height: 1.08,
   );
 
   // * Caption
-  static TextStyle caption1 = GoogleFonts.getFont(
-    'Nunito Sans',
+  static const TextStyle caption1 = TextStyle(
+    fontFamily: bodyFontFamily,
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: MyColors.muted,

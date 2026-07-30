@@ -4,6 +4,19 @@ import 'package:hive/hive.dart';
 final onboardingRepositoryProvider =
     Provider<OnboardingRepository>((ref) => OnboardingRepository());
 
+List<String> onboardingFrictions(Map<String, dynamic> answers) {
+  final stored = answers['frictions'];
+  final values = stored is List ? stored : [answers['friction']];
+  return values
+      .map((value) => value?.toString().trim() ?? '')
+      .where((value) => value.isNotEmpty)
+      .toSet()
+      .toList();
+}
+
+String onboardingFrictionSummary(Map<String, dynamic> answers) =>
+    onboardingFrictions(answers).join(' · ');
+
 class OnboardingRepository {
   static const _boxName = 'onboardingBox';
   static const _answersKey = 'answers';

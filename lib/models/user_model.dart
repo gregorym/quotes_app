@@ -8,24 +8,22 @@ class User {
   final tz.TZDateTime? lastOpened;
   final tz.TZDateTime? createdAt;
 
-  User({
-    required this.id,
-    this.email,
-    this.name,
-    this.gender,
-    this.lastOpened,
-    this.createdAt
-  });
+  User(
+      {required this.id,
+      this.email,
+      this.name,
+      this.gender,
+      this.lastOpened,
+      this.createdAt});
 
   factory User.fromJson(Map<dynamic, dynamic> json) {
     return User(
-      id: json['id'],
-      email: json['email'],
-      name: json['name'],
-      gender: json['gender'],
-      lastOpened: tz.TZDateTime.parse(tz.local, json['lastOpened']),
-      createdAt: tz.TZDateTime.parse(tz.local, json['createdAt']),
-
+      id: json['id']?.toString() ?? '',
+      email: json['email']?.toString(),
+      name: json['name']?.toString(),
+      gender: json['gender']?.toString(),
+      lastOpened: _parseDate(json['lastOpened']),
+      createdAt: _parseDate(json['createdAt']),
     );
   }
 
@@ -38,5 +36,14 @@ class User {
       'lastOpened': lastOpened.toString(),
       'createdAt': createdAt.toString(),
     };
+  }
+}
+
+tz.TZDateTime? _parseDate(Object? value) {
+  if (value == null || value.toString() == 'null') return null;
+  try {
+    return tz.TZDateTime.parse(tz.local, value.toString());
+  } on FormatException {
+    return null;
   }
 }

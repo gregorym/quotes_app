@@ -1,12 +1,21 @@
 import 'dart:io';
 
-import 'package:appinio_social_share/appinio_social_share.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 
 import '../models/quote_model.dart';
 import '../views/widgets/quot_widget_share.dart';
+
+const _nativeShareChannel = MethodChannel('com.mars6.noexcuse/share');
+
+Future<void> shareNativeQuote(String text, String filePath) =>
+    _nativeShareChannel.invokeMethod('share', {
+      'text': text,
+      'filePath': filePath,
+    });
 
 Future<void> shareQuoteImage(BuildContext context, Quote quote) async {
   final imageBytes = await ScreenshotController().captureFromWidget(
@@ -26,15 +35,10 @@ Future<void> shareQuoteImage(BuildContext context, Quote quote) async {
 
   await file.writeAsBytes(imageBytes, flush: true);
 
-  final share = AppinioSocialShare();
-  if (Platform.isIOS) {
-    await share.iOS.shareToSystem(quote.content, filePaths: [file.path]);
-    return;
+  if (kIsWeb ||
+      (defaultTargetPlatform != TargetPlatform.iOS &&
+          defaultTargetPlatform != TargetPlatform.android)) {
+    throw UnsupportedError('Native sharing is available on iOS and Android.');
   }
-  if (Platform.isAndroid) {
-    await share.android.shareToSystem('Quote', quote.content, file.path);
-    return;
-  }
-
-  throw UnsupportedError('Native sharing is available on iOS and Android.');
+  await shareNativeQuote(quote.content, file.path);
 }

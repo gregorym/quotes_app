@@ -1,9 +1,8 @@
-import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:quotes_app/models/quotable_model.dart';
 import 'package:quotes_app/models/quote_model.dart';
 
@@ -11,21 +10,15 @@ final quotesRepositoryProvider =
     Provider<QuotesRepository>((ref) => QuotesRepository());
 
 class QuotesRepository {
+  List<Quotable>? _cache;
+
   Future<List<Quotable>> getRandomQuotes() async {
-    final response = await http.get(
-      Uri.parse(
-          'https://nft-art-generator.nyc3.digitaloceanspaces.com/static/quotes/db.json'),
-    );
+    _cache ??= await _loadQuotes();
+    return List<Quotable>.of(_cache!)..shuffle();
+  }
 
-    if (response.statusCode != 200) {
-      return [];
-    }
-
-    final data = jsonDecode(response.body);
-    final quotes =
-        (data['quotes'] as List).map((e) => Quotable.fromJson(e)).toList();
-    quotes.shuffle();
-    return quotes;
+  Future<List<Quotable>> _loadQuotes() async {
+    return decodeQuotes(await rootBundle.loadString('db.txt'));
   }
 
   Future<List<Quotable>> searchQuotes(String query) async {
@@ -78,4 +71,13 @@ class QuotesRepository {
       rethrow;
     }
   }
+}
+
+List<Quotable> decodeQuotes(String source) {
+  return source
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .map((line) => Quotable(content: line))
+      .toList();
 }
