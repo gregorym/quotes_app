@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../controllers/streak_controller.dart';
+import '../../controllers/user_controller.dart';
 import '../../models/streak_model.dart';
 import '../themes/typography.dart';
 
@@ -15,13 +18,28 @@ class StreakCard extends ConsumerStatefulWidget {
   ConsumerState<StreakCard> createState() => _StreakCardState();
 }
 
-class _StreakCardState extends ConsumerState<StreakCard> {
+class _StreakCardState extends ConsumerState<StreakCard>
+    with SingleTickerProviderStateMixin {
   bool _saving = false;
+  late final _flameAnimation = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1650),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _flameAnimation.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final topInset = MediaQuery.paddingOf(context).top;
     final state = ref.watch(streakProvider);
+    final installedAt = ref.watch(userProvider).maybeWhen(
+          data: (user) => user.createdAt,
+          orElse: () => null,
+        );
     final streaks = state.maybeWhen(
       data: (streaks) => streaks,
       orElse: () => const <Streak>[],
@@ -29,6 +47,10 @@ class _StreakCardState extends ConsumerState<StreakCard> {
     final now = DateTime.now();
     final completedDays =
         streaks.map((streak) => streakDateKey(streak.createdAt)).toSet();
+    final topThreeDays = streaks
+        .where((streak) => streak.topThreeCompleted)
+        .map((streak) => streakDateKey(streak.createdAt))
+        .toSet();
     final todayComplete = completedDays.contains(streakDateKey(now));
     final streakCount = currentStreakCount(streaks, now);
 
@@ -49,6 +71,9 @@ class _StreakCardState extends ConsumerState<StreakCard> {
               streaks: streaks,
               now: now,
               completedDays: completedDays,
+              installedAt: installedAt,
+              topThreeDays: topThreeDays,
+              flameAnimation: _flameAnimation,
               streakCount: streakCount,
               todayComplete: todayComplete,
               loading: state.isLoading || _saving,
@@ -162,6 +187,9 @@ class _ChallengePanel extends StatelessWidget {
     required this.streaks,
     required this.now,
     required this.completedDays,
+    required this.installedAt,
+    required this.topThreeDays,
+    required this.flameAnimation,
     required this.streakCount,
     required this.todayComplete,
     required this.loading,
@@ -173,6 +201,9 @@ class _ChallengePanel extends StatelessWidget {
   final List<Streak> streaks;
   final DateTime now;
   final Set<int> completedDays;
+  final DateTime? installedAt;
+  final Set<int> topThreeDays;
+  final Animation<double> flameAnimation;
   final int streakCount;
   final bool todayComplete;
   final bool loading;
@@ -184,12 +215,6 @@ class _ChallengePanel extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
     final weekStart =
         DateTime(today.year, today.month, today.day - now.weekday % 7);
-    final firstCompleted = streaks.isEmpty
-        ? null
-        : streaks.map((streak) => streak.createdAt).reduce(
-              (a, b) => a.isBefore(b) ? a : b,
-            );
-
     return Container(
       height: 148,
       padding: const EdgeInsets.fromLTRB(16, 13, 16, 11),
@@ -235,16 +260,17 @@ class _ChallengePanel extends StatelessWidget {
               final date = DateTime(
                   weekStart.year, weekStart.month, weekStart.day + index);
               final complete = completedDays.contains(streakDateKey(date));
-              final inactive = firstCompleted == null ||
-                  date.isBefore(DateTime(
-                    firstCompleted.year,
-                    firstCompleted.month,
-                    firstCompleted.day,
-                  ));
-              final missed = date.isBefore(today) && !complete && !inactive;
+              final missed = isMissedStreakDay(
+                date,
+                today,
+                installedAt,
+                complete,
+              );
               return _DayFlame(
                 label: _labels[index],
                 complete: complete,
+                topThreeComplete: topThreeDays.contains(streakDateKey(date)),
+                flameAnimation: flameAnimation,
                 missed: missed,
                 today: streakDateKey(date) == streakDateKey(today),
               );
@@ -283,12 +309,16 @@ class _DayFlame extends StatelessWidget {
   const _DayFlame({
     required this.label,
     required this.complete,
+    required this.topThreeComplete,
+    required this.flameAnimation,
     required this.missed,
     required this.today,
   });
 
   final String label;
   final bool complete;
+  final bool topThreeComplete;
+  final Animation<double> flameAnimation;
   final bool missed;
   final bool today;
 
@@ -319,27 +349,88 @@ class _DayFlame extends StatelessWidget {
                   CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
               child: child,
             ),
-            child: Stack(
-              key: ValueKey('$complete-$missed-$today'),
-              alignment: Alignment.center,
-              children: [
-                SvgPicture.asset(
-                  _flameAsset,
-                  width: 30,
-                  height: 30,
-                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                ),
-                if (complete)
-                  const Icon(Icons.check_rounded,
-                      color: Colors.white, size: 17),
-                if (missed)
-                  const Icon(Icons.close_rounded,
-                      color: Colors.white, size: 14),
-              ],
-            ),
+            child: _flame(color, context),
           ),
         ],
       ),
     );
+  }
+
+  Widget _flame(Color color, BuildContext context) {
+    final animate = topThreeComplete &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        !MediaQuery.accessibleNavigationOf(context);
+    final fixedFlame = SvgPicture.asset(
+      _flameAsset,
+      width: 33,
+      height: 33,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+    Widget? animatedFlame;
+    if (animate) {
+      animatedFlame = AnimatedBuilder(
+        key: const Key('animated-top-three-flame'),
+        animation: flameAnimation,
+        child: SvgPicture.asset(
+          _flameAsset,
+          width: 33,
+          height: 33,
+          colorFilter: const ColorFilter.mode(
+            Color.fromARGB(255, 186, 55, 23),
+            BlendMode.srcIn,
+          ),
+        ),
+        builder: (_, child) {
+          final phase = flameAnimation.value * math.pi * 1.5;
+          final stretch = 1 + math.sin(phase * 2) * 0.05;
+          return Opacity(
+            opacity: 0.5 + (math.sin(phase * 3 + 0.8) + 1) * 0.05,
+            child: Transform.translate(
+              offset: Offset(
+                math.sin(phase * 2) * 0.6 + math.sin(phase * 3) * 0.2,
+                (1 - stretch) * 6,
+              ),
+              child: Transform.rotate(
+                angle: math.sin(phase) * 0.045 + math.sin(phase * 3) * 0.015,
+                alignment: Alignment.bottomCenter,
+                child: Transform.scale(
+                  scaleX: 1.1 * stretch,
+                  scaleY: 1.1 * stretch,
+                  alignment: Alignment.bottomCenter,
+                  child: child,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+    final flame = Stack(
+      alignment: Alignment.center,
+      children: [
+        if (animatedFlame != null) animatedFlame,
+        fixedFlame,
+        if (complete)
+          Transform.translate(
+            offset: const Offset(0, 2),
+            child: const Icon(
+              Icons.check_rounded,
+              color: Colors.white,
+              size: 14,
+            ),
+          ),
+        if (missed)
+          Transform.translate(
+            offset: const Offset(0, 4),
+            child: const Icon(
+              Icons.close_rounded,
+              color: Colors.white,
+              size: 14,
+            ),
+          ),
+      ],
+    );
+    final key = ValueKey('$complete-$missed-$today-$topThreeComplete');
+    return KeyedSubtree(key: key, child: flame);
   }
 }

@@ -18,6 +18,21 @@ int streakChallengeTarget(int count) => count >= 30
         ? 30
         : 7;
 
+bool isMissedStreakDay(
+  DateTime date,
+  DateTime today,
+  DateTime? installedAt,
+  bool complete,
+) =>
+    installedAt != null &&
+    !date.isBefore(DateTime(
+      installedAt.year,
+      installedAt.month,
+      installedAt.day,
+    )) &&
+    date.isBefore(today) &&
+    !complete;
+
 int currentStreakCount(List<Streak> streaks, DateTime now) {
   final completedDays =
       streaks.map((streak) => streakDateKey(streak.createdAt)).toSet();
@@ -47,16 +62,24 @@ class StreakController {
     return streaks;
   }
 
-  Future<bool> completeToday() async {
+  Future<bool> completeToday({bool topThreeCompleted = false}) async {
     final now = tz.TZDateTime.now(tz.local);
     final box = await Hive.openBox(_boxName);
-    final alreadyComplete = box.values
-        .whereType<Map<dynamic, dynamic>>()
-        .map(Streak.fromJson)
-        .any((streak) => streakDateKey(streak.createdAt) == streakDateKey(now));
-    if (alreadyComplete) return false;
+    for (final key in box.keys) {
+      final value = box.get(key);
+      if (value is! Map<dynamic, dynamic>) continue;
+      final streak = Streak.fromJson(value);
+      if (streakDateKey(streak.createdAt) != streakDateKey(now)) continue;
+      if (!topThreeCompleted || streak.topThreeCompleted) return false;
+      await box.put(key, streak.copyWith(topThreeCompleted: true).toJson());
+      return true;
+    }
 
-    await box.add(Streak(score: 1, createdAt: now).toJson());
+    await box.add(Streak(
+      score: 1,
+      createdAt: now,
+      topThreeCompleted: topThreeCompleted,
+    ).toJson());
     return true;
   }
 }

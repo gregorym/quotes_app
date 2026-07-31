@@ -9,14 +9,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../controllers/quotes_controller.dart';
+import '../../controllers/streak_controller.dart';
 import '../../controllers/subscription_controller.dart';
 import '../../models/quotable_model.dart';
 import '../../models/quote_model.dart';
 import '../../repositories/favorite_repository.dart';
 import '../../repositories/onboarding_repository.dart';
 import '../../repositories/top_tasks_repository.dart';
-import '../../utils/quote_share.dart';
 import '../../utils/external_links.dart';
+import '../../utils/quote_share.dart';
 import '../../widgets/reminder.dart';
 import '../themes/colors.dart';
 import '../themes/typography.dart';
@@ -30,13 +31,15 @@ class QuotesPage extends ConsumerStatefulWidget {
   ConsumerState<QuotesPage> createState() => _QuotesPageState();
 }
 
-class _QuotesPageState extends ConsumerState<QuotesPage> {
+class _QuotesPageState extends ConsumerState<QuotesPage>
+    with WidgetsBindingObserver {
   static const _fallbackQuote =
       "You don't need more time. You need more balls.";
   late final PageController _quotePageController;
   final _topTasksRepository = TopTasksRepository();
+  Timer? _taskCleanupTimer;
   int _quoteIndex = 0;
-  bool _showTopTasks = false;
+  bool _showTopTasks = true;
   bool _tasksLoaded = false;
   bool _tasksLoading = false;
   bool _tasksSaving = false;
@@ -45,13 +48,26 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _quotePageController = PageController();
+    _scheduleTaskCleanup();
+    unawaited(_loadTopTasks());
+    unawaited(_loadTopTasksVisibility());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _taskCleanupTimer?.cancel();
     _quotePageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    _scheduleTaskCleanup();
+    if (_tasksLoaded) unawaited(_loadTopTasks());
   }
 
   @override
@@ -213,8 +229,6 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        const SizedBox(height: 8),
-                        _topTasksAction(),
                       ],
                     ),
                   ),
@@ -360,30 +374,33 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
     );
   }
 
-  Widget _topTasksAction() => IconButton(
-        tooltip: _showTopTasks ? 'Hide top three' : 'Show top three',
-        onPressed: _toggleTopTasks,
-        icon: Icon(
-          _showTopTasks
-              ? Icons.checklist_rounded
-              : Icons.playlist_add_check_rounded,
-        ),
-        color: _showTopTasks ? MyColors.orange : Colors.white,
-        iconSize: 36,
-      );
+  Future<void> _loadTopTasksVisibility() async {
+    final visible = await _topTasksRepository.fetchVisible();
+    if (mounted) setState(() => _showTopTasks = visible);
+  }
 
-  void _toggleTopTasks() {
-    HapticFeedback.selectionClick();
-    setState(() => _showTopTasks = !_showTopTasks);
-    if (_showTopTasks && !_tasksLoaded && !_tasksLoading) {
-      unawaited(_loadTopTasks());
+  Future<bool> _setTopTasksVisibility(bool visible) async {
+    final previous = _showTopTasks;
+    setState(() => _showTopTasks = visible);
+    try {
+      await _topTasksRepository.saveVisible(visible);
+      if (visible && !_tasksLoaded && !_tasksLoading) {
+        unawaited(_loadTopTasks());
+      }
+      return true;
+    } catch (_) {
+      if (mounted) {
+        setState(() => _showTopTasks = previous);
+        showSnackbar(context, 'Could not update your settings.', isError: true);
+      }
+      return false;
     }
   }
 
   Future<void> _loadTopTasks() async {
     setState(() => _tasksLoading = true);
     try {
-      final tasks = await _topTasksRepository.fetchToday();
+      final tasks = await _topTasksRepository.fetchActive();
       if (!mounted) return;
       setState(() {
         _topTasks = tasks;
@@ -418,13 +435,42 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
   }
 
   Future<void> _toggleTask(TopTask task) async {
-    await _saveTasks(
-      _topTasks
-          .map((item) => item.id == task.id
-              ? item.copyWith(completed: !item.completed)
-              : item)
-          .toList(),
-    );
+    if (!task.completed && !ref.read(subscribedProvider)) {
+      context.push('/subscription');
+      return;
+    }
+
+    final updated = _topTasks
+        .map((item) => item.id != task.id
+            ? item
+            : item.completed
+                ? item.copyWith(completed: false, clearCompletedAt: true)
+                : item.copyWith(
+                    completed: true,
+                    completedAt: DateTime.now(),
+                  ))
+        .toList();
+    if (!await _saveTasks(updated)) return;
+    if (task.completed) return;
+
+    final allCompleted =
+        updated.length == 3 && updated.every((item) => item.completed);
+    if (!allCompleted) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+
+    HapticFeedback.successNotification();
+    try {
+      await ref
+          .read(streakControllerProvider)
+          .completeToday(topThreeCompleted: true);
+      ref.invalidate(streakProvider);
+    } catch (_) {
+      if (mounted) {
+        showSnackbar(context, 'Could not update your streak.', isError: true);
+      }
+    }
   }
 
   Future<void> _deleteTask(TopTask task) async {
@@ -443,7 +489,8 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       _tasksSaving = true;
     });
     try {
-      await _topTasksRepository.saveToday(ordered);
+      final savedTasks = await _topTasksRepository.saveActive(ordered);
+      if (mounted) setState(() => _topTasks = savedTasks);
       saved = true;
     } catch (_) {
       if (mounted) {
@@ -454,6 +501,18 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       if (mounted) setState(() => _tasksSaving = false);
     }
     return saved;
+  }
+
+  void _scheduleTaskCleanup() {
+    _taskCleanupTimer?.cancel();
+    final now = DateTime.now();
+    var next = DateTime(now.year, now.month, now.day, 6);
+    if (!next.isAfter(now)) next = next.add(const Duration(days: 1));
+    _taskCleanupTimer = Timer(next.difference(now), () {
+      if (!mounted) return;
+      unawaited(_loadTopTasks());
+      _scheduleTaskCleanup();
+    });
   }
 
   Future<void> _shareQuote(
@@ -499,7 +558,10 @@ class _QuotesPageState extends ConsumerState<QuotesPage> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.22),
       isScrollControlled: true,
-      builder: (context) => const _ProfileSheet(),
+      builder: (context) => _ProfileSheet(
+        showTopTasks: _showTopTasks,
+        onShowTopTasksChanged: _setTopTasksVisibility,
+      ),
     );
   }
 }
@@ -749,50 +811,59 @@ class _TopTaskRow extends StatelessWidget {
         height: 43,
         child: Row(
           children: [
-            Semantics(
-              label: task.text,
-              child: Checkbox(
-                value: task.completed,
-                onChanged: enabled ? (_) => onToggle() : null,
-                activeColor: MyColors.orange,
-                checkColor: Colors.white,
-                shape: const CircleBorder(),
-                side: const BorderSide(color: Colors.white54, width: 1.5),
+            Transform.translate(
+              offset: const Offset(-14, 0),
+              child: Semantics(
+                label: task.text,
+                child: Checkbox(
+                  value: task.completed,
+                  onChanged: enabled ? (_) => onToggle() : null,
+                  activeColor: MyColors.orange,
+                  checkColor: Colors.white,
+                  shape: const CircleBorder(),
+                  side: const BorderSide(color: Colors.white54, width: 1.5),
+                ),
               ),
             ),
             Expanded(
-              child: InkWell(
-                onTap: enabled ? onEdit : null,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: AnimatedDefaultTextStyle(
-                    duration: MediaQuery.disableAnimationsOf(context) ||
-                            MediaQuery.accessibleNavigationOf(context)
-                        ? Duration.zero
-                        : const Duration(milliseconds: 220),
-                    style: MyTypography.body1.copyWith(
-                      color: task.completed ? Colors.white38 : Colors.white,
-                      decoration: task.completed
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      decorationColor: Colors.white54,
-                    ),
-                    child: Text(
-                      task.text,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              child: Transform.translate(
+                offset: const Offset(-14, 0),
+                child: InkWell(
+                  onTap: enabled ? onEdit : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: AnimatedDefaultTextStyle(
+                      duration: MediaQuery.disableAnimationsOf(context) ||
+                              MediaQuery.accessibleNavigationOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 220),
+                      style: MyTypography.body1.copyWith(
+                        color: task.completed ? Colors.white38 : Colors.white,
+                        decoration: task.completed
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                        decorationColor: Colors.white54,
+                      ),
+                      child: Text(
+                        task.text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-            IconButton(
-              tooltip: 'Delete ${task.text}',
-              onPressed: enabled ? onDelete : null,
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.close_rounded, size: 19),
-              color: Colors.white38,
+            Transform.translate(
+              offset: const Offset(12, 0),
+              child: IconButton(
+                tooltip: 'Delete ${task.text}',
+                onPressed: enabled ? onDelete : null,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.close_rounded, size: 19),
+                color: Colors.white38,
+              ),
             ),
           ],
         ),
@@ -930,11 +1001,24 @@ class _TypewriterQuoteState extends State<_TypewriterQuote> {
   }
 }
 
-class _ProfileSheet extends ConsumerWidget {
-  const _ProfileSheet();
+class _ProfileSheet extends ConsumerStatefulWidget {
+  const _ProfileSheet({
+    required this.showTopTasks,
+    required this.onShowTopTasksChanged,
+  });
+
+  final bool showTopTasks;
+  final Future<bool> Function(bool) onShowTopTasksChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ProfileSheet> createState() => _ProfileSheetState();
+}
+
+class _ProfileSheetState extends ConsumerState<_ProfileSheet> {
+  late bool _showTopTasks = widget.showTopTasks;
+
+  @override
+  Widget build(BuildContext context) {
     final favorites = ref.watch(favoriteQuotesProvider).maybeWhen(
           data: (favorites) => favorites,
           orElse: () => const <Quote>[],
@@ -998,6 +1082,20 @@ class _ProfileSheet extends ConsumerWidget {
                       label: 'Notifications',
                       onTap: () => _showReminderSheet(context),
                     ),
+                    _ProfileAction.toggle(
+                      label: 'Show Top 3',
+                      value: _showTopTasks,
+                      onChanged: (visible) async {
+                        if (await widget.onShowTopTasksChanged(visible) &&
+                            mounted) {
+                          setState(() => _showTopTasks = visible);
+                        }
+                      },
+                    ),
+                    _ProfileAction(
+                      label: 'Task history',
+                      onTap: () => _showTaskHistorySheet(context),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -1036,10 +1134,19 @@ class _ProfileAction {
   const _ProfileAction({
     required this.label,
     required this.onTap,
-  });
+  })  : value = null,
+        onChanged = null;
+
+  const _ProfileAction.toggle({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  }) : onTap = null;
 
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool? value;
+  final ValueChanged<bool>? onChanged;
 }
 
 class _ProfileSection extends StatelessWidget {
@@ -1097,13 +1204,15 @@ class _ProfileRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final value = action.value;
     return Semantics(
-      button: true,
+      button: value == null,
+      toggled: value,
       label: action.label,
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: action.onTap,
+        onTap: value == null ? action.onTap : () => action.onChanged!(!value),
         child: SizedBox(
           height: 48,
           child: Row(
@@ -1118,7 +1227,15 @@ class _ProfileRow extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: MyColors.ink, size: 30),
+              if (value == null)
+                const Icon(Icons.chevron_right, color: MyColors.ink, size: 30)
+              else
+                Switch(
+                  key: const Key('show-top-three-toggle'),
+                  value: value,
+                  onChanged: action.onChanged,
+                  activeTrackColor: MyColors.orange,
+                ),
               const SizedBox(width: 14),
             ],
           ),
@@ -1126,6 +1243,150 @@ class _ProfileRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TaskHistorySheet extends StatefulWidget {
+  const _TaskHistorySheet();
+
+  @override
+  State<_TaskHistorySheet> createState() => _TaskHistorySheetState();
+}
+
+class _TaskHistorySheetState extends State<_TaskHistorySheet> {
+  late final Future<List<TopTask>> _history =
+      TopTasksRepository().fetchHistory();
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      key: const Key('task-history'),
+      heightFactor: 0.82,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: MyColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 54,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: MyColors.disabled,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                        child: Text('Task history', style: MyTypography.h2)),
+                    IconButton(
+                      tooltip: 'Close task history',
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Completed tasks leave your Top 3 at 6:00 a.m.',
+                  style: MyTypography.body2.copyWith(color: MyColors.muted),
+                ),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: FutureBuilder<List<TopTask>>(
+                    future: _history,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: MyColors.orange,
+                          ),
+                        );
+                      }
+                      final groups = <DateTime, List<TopTask>>{};
+                      for (final task in snapshot.data!) {
+                        final completedAt = task.completedAt!;
+                        final date = DateTime(
+                          completedAt.year,
+                          completedAt.month,
+                          completedAt.day,
+                        );
+                        groups.putIfAbsent(date, () => []).add(task);
+                      }
+                      if (groups.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No completed tasks yet.',
+                            style: MyTypography.body1.copyWith(
+                              color: MyColors.muted,
+                            ),
+                          ),
+                        );
+                      }
+                      return ListView(
+                        children: [
+                          for (final group in groups.entries) ...[
+                            Padding(
+                              key: ValueKey(
+                                'task-history-${group.key.year}-${group.key.month}-${group.key.day}',
+                              ),
+                              padding: const EdgeInsets.only(top: 8, bottom: 6),
+                              child: Text(
+                                MaterialLocalizations.of(context)
+                                    .formatFullDate(group.key),
+                                style: MyTypography.caption1.copyWith(
+                                  color: MyColors.orange,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.7,
+                                ),
+                              ),
+                            ),
+                            for (final task in group.value)
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(
+                                  Icons.check_circle,
+                                  color: MyColors.orange,
+                                ),
+                                title: Text(
+                                  task.text,
+                                  style: MyTypography.body1.copyWith(
+                                    color: Colors.white70,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _showTaskHistorySheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.22),
+    isScrollControlled: true,
+    builder: (context) => const _TaskHistorySheet(),
+  );
 }
 
 class _FavoritesSheet extends ConsumerWidget {

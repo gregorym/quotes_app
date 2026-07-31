@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quotes_app/controllers/quotes_controller.dart';
 import 'package:quotes_app/controllers/streak_controller.dart';
+import 'package:quotes_app/controllers/user_controller.dart';
 import 'package:quotes_app/models/quotable_model.dart';
 import 'package:quotes_app/models/quote_model.dart';
 import 'package:quotes_app/models/streak_model.dart';
+import 'package:quotes_app/models/user_model.dart';
 import 'package:quotes_app/repositories/favorite_repository.dart';
 import 'package:quotes_app/views/templates/quotes_page_template.dart';
 import 'package:quotes_app/views/widgets/quotes_card.dart';
@@ -45,6 +47,7 @@ void main() {
           ),
           favoriteQuotesProvider.overrideWith((ref) async => const <Quote>[]),
           streakProvider.overrideWith((ref) async => const <Streak>[]),
+          userProvider.overrideWith((ref) async => User(id: 'test')),
         ],
         child: const MaterialApp(home: QuotesPage()),
       ),
@@ -104,6 +107,7 @@ void main() {
           ),
           favoriteQuotesProvider.overrideWith((ref) async => const <Quote>[]),
           streakProvider.overrideWith((ref) async => const <Streak>[]),
+          userProvider.overrideWith((ref) async => User(id: 'test')),
         ],
         child: const MaterialApp(home: QuotesPage()),
       ),
@@ -132,19 +136,23 @@ void main() {
     final completedToday = Streak(
       score: 1,
       createdAt: tz.TZDateTime.utc(now.year, now.month, now.day),
+      topThreeCompleted: true,
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           streakProvider.overrideWith((ref) async => [completedToday]),
+          userProvider.overrideWith((ref) async => User(id: 'test')),
         ],
         child: const MaterialApp(home: Scaffold(body: StreakCard())),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.byType(FilledButton), findsNothing);
+    expect(find.byKey(const Key('animated-top-three-flame')), findsOneWidget);
     expect(
       tester.widgetList<Column>(find.byType(Column)).any(
             (column) =>
